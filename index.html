@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0D1B16">
 <title>ur.financialguy | Atur uang dari gaji pertama sampai pensiun</title>
-<meta name="description" content="Aplikasi keuangan pribadi gratis: arus kas, kekayaan bersih, dana darurat, simulasi KPR, tujuan keuangan, monitor investasi, rebalancing, dan persiapan pensiun. Tanpa akun, data tetap di perangkatmu.">
+<meta name="description" content="Aplikasi keuangan pribadi gratis: catatan harian per kategori, arus kas, kekayaan bersih, dana darurat, simulasi KPR, tujuan keuangan, monitor investasi, rebalancing, dan persiapan pensiun. Tanpa akun, data tetap di perangkatmu.">
 <meta property="og:title" content="ur.financialguy">
-<meta property="og:description" content="Dari gaji pertama sampai dana pensiun. Sebelas alat hitung keuangan dalam satu aplikasi, gratis dan tanpa akun.">
+<meta property="og:description" content="Dari gaji pertama sampai dana pensiun. Dua belas alat keuangan dalam satu aplikasi, dari catatan harian sampai pensiun. Gratis dan tanpa akun.">
 <meta property="og:image" content="assets/og.jpg">
 <meta property="og:type" content="website">
 <link rel="manifest" href="manifest.webmanifest">
@@ -188,6 +188,10 @@ footer .wrap{display:flex;gap:24px 40px;flex-wrap:wrap;align-items:flex-start;ju
 footer nav{display:flex;gap:10px 22px;flex-wrap:wrap}
 footer nav a{color:#DCE8E0;text-decoration:none}
 footer nav a:hover{color:var(--gold)}
+.igb{display:inline-flex;align-items:center;justify-content:center;gap:9px;height:44px;padding:0 20px;border-radius:999px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.06);color:#fff;text-decoration:none;font:600 14.5px var(--body);white-space:nowrap;transition:background .2s,border-color .2s,transform .2s}
+.igb svg{width:18px;height:18px;color:var(--gold)}
+.igb:hover{background:rgba(255,255,255,.12);border-color:var(--gold);transform:translateY(-1px)}
+.final .ctas.credit{margin-top:14px}
 footer .fine{flex-basis:100%;font-size:12.5px;color:#7F988A;max-width:80ch}
 
 /* ---------- responsive ---------- */
@@ -248,11 +252,11 @@ footer .fine{flex-basis:100%;font-size:12.5px;color:#7F988A;max-width:80ch}
   <div class="wrap">
     <h1>Dari gaji pertama sampai dana pensiun.</h1>
     <div class="facts">
-      <div><b>11</b><span>alat hitung<br>dalam satu app</span></div><i class="sep"></i>
+      <div><b>12</b><span>alat keuangan<br>dalam satu app</span></div><i class="sep"></i>
       <div><b>0</b><span>data dikirim<br>ke server</span></div><i class="sep"></i>
       <div><b>Rp0</b><span>tanpa akun,<br>tanpa langganan</span></div>
     </div>
-    <p class="lead">ur.financialguy merapikan arus kas, kekayaan bersih, dana darurat, KPR, investasi, sampai rencana pensiun dalam satu aplikasi yang bisa dibuka di HP maupun laptop.</p>
+    <p class="lead">ur.financialguy merapikan catatan harian, arus kas, kekayaan bersih, dana darurat, KPR, investasi, sampai rencana pensiun dalam satu aplikasi yang bisa dibuka di HP maupun laptop.</p>
     <div class="ctas"><a class="btn gold" href="app/">Buka app</a><a class="btn ghost" href="app/?demo=1">Coba dengan data contoh</a></div>
   </div>
   <a class="hint" href="#lihat">Gulir untuk melihat <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5l6 6 6-6"/></svg></a>
@@ -280,7 +284,7 @@ footer .fine{flex-basis:100%;font-size:12.5px;color:#7F988A;max-width:80ch}
 </section>
 
 <section class="mods" id="fitur">
-  <div class="wrap mods-h"><h2>Sebelas alat, <span>satu kebiasaan</span> sebulan sekali.</h2><p>Isi pemasukan, pengeluaran, dan nilai asetmu tiap bulan. Sisanya dihitung otomatis dan saling terhubung antar modul.</p></div>
+  <div class="wrap mods-h"><h2>Dua belas alat, <span>satu kebiasaan</span> kecil tiap hari.</h2><p>Catat pengeluaran saat terjadi, isi nilai asetmu sebulan sekali. Sisanya dihitung otomatis dan saling terhubung antar modul.</p></div>
   <div class="tabs" id="tabs"><div class="row"><a href="#c-pantau" data-g="pantau">Pantau</a><a href="#c-siapkan" data-g="siapkan">Siapkan</a><a href="#c-hitung" data-g="hitung">Hitung</a><a href="#c-kembangkan" data-g="kembangkan">Kembangkan</a></div><div class="track"><i></i></div></div>
   <div class="stack" id="stack"></div>
 </section>
@@ -309,13 +313,15 @@ footer .fine{flex-basis:100%;font-size:12.5px;color:#7F988A;max-width:80ch}
 <section class="final" style="background:var(--vault)">
   <div class="aurora" aria-hidden="true"><i class="a1"></i><i class="a2"></i><i class="a3"></i><i class="a4"></i></div>
   <div class="wrap"><h2>Mulai dari bulan ini.</h2><p>Cukup isi pemasukan dan pengeluaran bulan ini. Ringkasan, rasio kesehatan, dan grafiknya menyusul sendiri.</p>
-    <div class="ctas"><a class="btn gold" href="app/">Buka app</a><a class="btn ghost" href="app/?demo=1">Coba dengan data contoh</a></div></div>
+    <div class="ctas"><a class="btn gold" href="app/">Buka app</a><a class="btn ghost" href="app/?demo=1">Coba dengan data contoh</a></div>
+    <div class="ctas credit"><a class="igb" href="https://instagram.com/ur.chillguy" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.9"/><circle cx="17.1" cy="6.9" r=".6" fill="currentColor"/></svg>Instagram @ur.chillguy</a></div></div>
 </section>
 </main>
 
 <footer><div class="wrap">
   <a class="wordmark" href="./"><svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#13241D"/><g fill="none" stroke="#FFC81E" stroke-width="1.35" class="petals"></g><circle cx="20" cy="20" r="2.2" fill="#FFC81E"/></svg><span>ur.<b>financial</b>guy</span></a>
-  <nav aria-label="Tautan"><a href="app/">Buka app</a><a href="https://instagram.com/ur.chillguy" rel="noopener">Kirim masukan lewat Instagram</a><a href="https://ur-chillguy.github.io/ur-coachguy/" rel="noopener">ur.coachguy</a></nav>
+  <nav aria-label="Tautan"><a href="app/">Buka app</a><a href="https://ur-chillguy.github.io/ur-coachguy/" rel="noopener">ur.coachguy</a></nav>
+  <a class="igb" href="https://instagram.com/ur.chillguy" target="_blank" rel="noopener noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.9"/><circle cx="17.1" cy="6.9" r=".6" fill="currentColor"/></svg>Dibuat oleh @ur.chillguy</a>
   <p class="fine">ur.financialguy adalah alat bantu hitung dan pencatatan, bukan nasihat keuangan profesional. Untuk keputusan besar seperti KPR atau investasi, bandingkan juga dengan penawaran resmi dan konsultasikan bila perlu. © 2026 ur.financialguy.</p>
 </div></footer>
 
@@ -332,6 +338,7 @@ footer .fine{flex-basis:100%;font-size:12.5px;color:#7F988A;max-width:80ch}
   const ICON = {
     home: '<path d="M4 15a8 8 0 0 1 16 0"/><path d="M12 15l4.2-5"/><circle cx="12" cy="15" r="1.3"/><path d="M3 19.5h18"/>',
     flow: '<path d="M7 20V5M3.5 8.5 7 5l3.5 3.5"/><path d="M17 4v15M13.5 15.5 17 19l3.5-3.5"/>',
+    note: '<path d="M6 3.5h8.5L19 8v12.5H6z"/><path d="M14 3.5V8.5h5"/><path d="M9.2 12.5h6.6M9.2 16h6.6"/>',
     worth: '<ellipse cx="12" cy="6" rx="7" ry="2.7"/><path d="M5 6v4.4c0 1.5 3.1 2.7 7 2.7s7-1.2 7-2.7V6"/><path d="M5 10.4v4.4c0 1.5 3.1 2.7 7 2.7s7-1.2 7-2.7v-4.4"/><path d="M5 14.8v3c0 1.5 3.1 2.7 7 2.7s7-1.2 7-2.7v-3"/>',
     shield: '<path d="M3.5 12a8.5 8.5 0 0 1 17 0z"/><path d="M12 12v6.2a2 2 0 0 1-4 0"/><path d="M12 3.5V2.6"/>',
     goal: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1"/>',
@@ -341,8 +348,9 @@ footer .fine{flex-basis:100%;font-size:12.5px;color:#7F988A;max-width:80ch}
   };
   const ic = (n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n]}</svg>`;
   const MODS = [
-    { g: 'pantau', icon: 'home', k: 'Ringkasan', h: 'Kondisi keuanganmu dalam satu layar.', img: 'm-ringkasan', link: 'ringkasan', c: ['#E0A41A', '#BE3B63', '#2B7A5C'], li: ['Empat rasio kesehatan keuangan dicek otomatis', 'Grafik arus kas dan kekayaan bersih sepanjang tahun', 'Tidak perlu diisi, semua ditarik dari modul lain'] },
-    { g: 'pantau', icon: 'flow', k: 'Arus kas', h: 'Rencana di awal bulan, angka sebenarnya di akhir.', img: 'm-arus', link: 'arus-kas', c: ['#2B7A5C', '#3A76A6', '#E0A41A'], li: ['Uang masuk, biaya hidup, kewajiban, dan masa depan', 'Selisih rencana dan kenyataan langsung kelihatan', 'Salin rencana bulan lalu dengan sekali ketuk'] },
+    { g: 'pantau', icon: 'home', k: 'Ringkasan', h: 'Kondisi keuanganmu dalam satu layar.', img: 'm-ringkasan', link: 'ringkasan', c: ['#E0A41A', '#BE3B63', '#2B7A5C'], li: ['Empat rasio kesehatan keuangan dicek otomatis', 'Histori tahun ke tahun: bandingkan dengan tahun-tahun sebelumnya', 'Tidak perlu diisi, semua ditarik dari modul lain'] },
+    { g: 'pantau', icon: 'note', k: 'Catatan harian', h: 'Catat saat kejadian, lihat pos mana yang boncos.', img: 'm-catatan', link: 'catatan', c: ['#BE3B63', '#E0A41A', '#2B7A5C'], li: ['Catat uang masuk, keluar, dan tabungan dalam hitungan detik', 'Kategori mengikuti pos anggaranmu dan bisa ditambah kapan saja', 'Pos yang melewati anggaran ditandai, daftar bisa diurutkan per kategori'] },
+    { g: 'pantau', icon: 'flow', k: 'Arus kas', h: 'Rencana di awal bulan, angka sebenarnya di akhir.', img: 'm-arus', link: 'arus-kas', c: ['#2B7A5C', '#3A76A6', '#E0A41A'], li: ['Uang masuk, biaya hidup, kewajiban, dan masa depan', 'Realisasi terisi otomatis dari Catatan harian', 'Selisih rencana dan kenyataan langsung kelihatan'] },
     { g: 'pantau', icon: 'worth', k: 'Kekayaan bersih', h: 'Tahu persis berapa kekayaanmu, bulan ke bulan.', img: 'm-kekayaan', link: 'kekayaan', c: ['#E0A41A', '#2B7A5C', '#7A4FA0'], li: ['Kas, investasi, aset tetap, dan sisa utang', 'Komposisi aset dan rasio aset terhadap utang', 'Nilai investasi bisa ditarik dari Monitor Investasi'] },
     { g: 'siapkan', icon: 'shield', k: 'Dana darurat', h: 'Target yang masuk akal, dan kapan tercapainya.', img: 'm-darurat', link: 'dana-darurat', c: ['#3A76A6', '#E0A41A', '#2B7A5C'], li: ['Target 3, 6, atau 12 kali pengeluaran wajib', 'Angka bisa diambil langsung dari Arus Kas dan Kekayaan', 'Panduan tempat menaruh dana darurat yang aman'] },
     { g: 'siapkan', icon: 'goal', k: 'Tujuan keuangan', h: 'DP rumah, umrah, sekolah anak. Kapan tercapai?', img: 'm-tujuan', link: 'tujuan', c: ['#E0A41A', '#7A4FA0', '#3A76A6'], li: ['Tujuan sebanyak yang kamu mau, tanpa batas', 'Bandingkan hanya menabung dengan berinvestasi', 'Perkiraan bulan dan tahun tercapainya'] },
