@@ -1,0 +1,17 @@
+{
+  "name": "ur.financialguy",
+  "short_name": "financialguy",
+  "description": "Catat arus kas, pantau kekayaan bersih, dan hitung dana darurat, KPR, tujuan keuangan, investasi, sampai pensiun.",
+  "id": "./app/",
+  "start_url": "./app/",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EDF1EB",
+  "theme_color": "#0D1B16",
+  "lang": "id",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,1856 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EDF1EB">
+<title>ur.financialguy</title>
+<meta name="description" content="Catat arus kas, pantau kekayaan bersih, dan hitung dana darurat, KPR, tujuan keuangan, investasi, sampai pensiun. Data tersimpan di perangkat kamu.">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="financialguy">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@400..650&display=swap" rel="stylesheet">
+<style>
+:root{
+  --vault:#0D1B16; --vault-2:#132721; --vault-3:#1B3329; --vault-line:#25402F;
+  --bg:#EDF1EB; --surface:#FFFFFF; --surface-2:#F5F8F3; --sunken:#E4EAE3;
+  --ink:#14201A; --ink-2:#34443C; --muted:#64736B; --line:#D7DFD7; --line-2:#C6D1C7;
+  --brand:#1F5E46; --brand-2:#2B7A5C; --brand-soft:#DCEBE2;
+  --gold:#FFC81E; --gold-ink:#3A2C00; --gold-soft:#FFF1C4;
+  --pos:#1D8556; --pos-soft:#DDF1E5; --neg:#BE3B63; --neg-soft:#F8E0E7; --warn:#B7791F; --warn-soft:#FBEFD6;
+  --c-income:#1F5E46; --c-living:#3A76A6; --c-debt:#BE3B63; --c-future:#2E9A6B; --c-gold:#D9A21B; --c-plum:#7A4FA0; --c-slate:#5E6E66;
+  --radius:16px; --radius-sm:10px;
+  --display:'Bricolage Grotesque','Geist',system-ui,sans-serif;
+  --body:'Geist',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --shadow:0 1px 0 rgba(13,27,22,.04),0 10px 30px -18px rgba(13,27,22,.35);
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0A1410; --surface:#111E18; --surface-2:#15251D; --sunken:#0D1913;
+  --ink:#E6EEE8; --ink-2:#C2D0C7; --muted:#8C9C93; --line:#22362B; --line-2:#2D4638;
+  --brand:#5FC296; --brand-2:#7BD3AA; --brand-soft:#173A2A;
+  --gold-soft:#3A3010; --pos:#4CC488; --pos-soft:#123826; --neg:#F07198; --neg-soft:#3E1726; --warn:#E6B04F; --warn-soft:#3A2C10;
+  --c-income:#5FC296; --c-living:#6EA8D8; --c-debt:#F07198; --c-future:#4CC488; --c-gold:#F0C04A; --c-plum:#B58BDB; --c-slate:#8FA197;
+  --shadow:0 1px 0 rgba(0,0,0,.2),0 14px 34px -20px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0A1410; --surface:#111E18; --surface-2:#15251D; --sunken:#0D1913;
+    --ink:#E6EEE8; --ink-2:#C2D0C7; --muted:#8C9C93; --line:#22362B; --line-2:#2D4638;
+    --brand:#5FC296; --brand-2:#7BD3AA; --brand-soft:#173A2A;
+    --gold-soft:#3A3010; --pos:#4CC488; --pos-soft:#123826; --neg:#F07198; --neg-soft:#3E1726; --warn:#E6B04F; --warn-soft:#3A2C10;
+    --c-income:#5FC296; --c-living:#6EA8D8; --c-debt:#F07198; --c-future:#4CC488; --c-gold:#F0C04A; --c-plum:#B58BDB; --c-slate:#8FA197;
+    --shadow:0 1px 0 rgba(0,0,0,.2),0 14px 34px -20px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--body);font-feature-settings:"ss01";-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--brand)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+.num,.tnum{font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:264px 1fr;min-height:100vh;min-height:100dvh}
+.side{position:sticky;top:0;height:100vh;height:100dvh;background:var(--vault);color:#DCE8E0;display:flex;flex-direction:column;overflow:hidden}
+.side .rosette{position:absolute;right:-120px;bottom:-130px;width:360px;height:360px;opacity:.22;pointer-events:none}
+.brand{display:flex;align-items:center;gap:10px;padding:22px 22px 18px;text-decoration:none;color:#fff}
+.brand svg{width:34px;height:34px;flex:none}
+.wordmark{font:700 19px/1 var(--display);letter-spacing:-.02em}
+.wordmark span{color:var(--gold)}
+.nav{flex:1;overflow-y:auto;padding:4px 12px 20px;position:relative;z-index:1;scrollbar-width:thin;scrollbar-color:var(--vault-3) transparent}
+.nav h6{margin:18px 12px 6px;font:500 12px/1.2 var(--body);color:#7F988A;letter-spacing:.01em}
+.nav a{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:#C9D8CF;text-decoration:none;font-weight:500;font-size:14.5px;position:relative}
+.nav a svg{width:18px;height:18px;flex:none;opacity:.85}
+.nav a:hover{background:var(--vault-2);color:#fff}
+.nav a[aria-current="page"]{background:var(--vault-3);color:#fff}
+.nav a[aria-current="page"]::before{content:"";position:absolute;left:-12px;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--gold)}
+.side-foot{padding:14px 22px 20px;font-size:12.5px;color:#7F988A;position:relative;z-index:1;border-top:1px solid var(--vault-line)}
+.side-foot b{color:#DCE8E0;font-weight:500}
+
+.main{min-width:0;display:flex;flex-direction:column}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:14px clamp(16px,3vw,36px);background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid transparent}
+.top.scrolled{border-bottom-color:var(--line)}
+.top h1{margin:0;font:700 clamp(20px,2.2vw,26px)/1.1 var(--display);letter-spacing:-.025em;flex:1;min-width:0}
+.top .m-brand{display:none}
+.year{display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);height:38px}
+.year button{border:0;background:none;width:36px;height:36px;border-radius:999px;display:grid;place-items:center;color:var(--muted)}
+.year button:hover{color:var(--ink);background:var(--surface-2)}
+.year b{font:600 15px var(--body);min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+.icon-btn{border:1px solid var(--line-2);background:var(--surface);width:38px;height:38px;border-radius:999px;display:grid;place-items:center;color:var(--ink-2)}
+.icon-btn:hover{border-color:var(--ink-2)}
+.icon-btn svg{width:18px;height:18px}
+.content{padding:8px clamp(16px,3vw,36px) 64px;max-width:1280px;width:100%}
+.lede{margin:0 0 22px;color:var(--muted);max-width:68ch}
+
+/* ---------- bottom tabs (mobile) ---------- */
+.tabs{display:none}
+
+/* ---------- building blocks ---------- */
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.split{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.panel.flat{background:transparent;border-style:dashed}
+.panel h2,.sec-h{margin:0 0 4px;font:650 18px/1.25 var(--display);letter-spacing:-.015em}
+.panel .sub{margin:0 0 14px;color:var(--muted);font-size:13.5px}
+.panel-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.panel-h h2{margin:0}
+.panel-h .sub{margin:2px 0 0}
+.stack>*+*{margin-top:18px}
+.mt{margin-top:18px}.mt-l{margin-top:28px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.spacer{flex:1}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.warn{color:var(--warn)}
+
+.vault{background:var(--vault);color:#E3EEE7;border:0;position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.vault .rosette{position:absolute;right:-90px;top:-90px;width:320px;height:320px;opacity:.28;pointer-events:none}
+.vault .muted{color:#8FA99B}
+.vault .pos{color:#62D69B}.vault .neg{color:#FF8DB0}
+
+.metric .lbl{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.vault .metric .lbl{color:#9DB6A8}
+.metric .val{font:700 clamp(24px,3vw,34px)/1.1 var(--display);letter-spacing:-.03em;margin-top:6px;font-variant-numeric:tabular-nums}
+.metric .val.xl{font-size:clamp(32px,4.6vw,52px)}
+.metric .foot{font-size:13px;margin-top:6px;color:var(--muted)}
+.vault .metric .foot{color:#9DB6A8}
+.dot{width:9px;height:9px;border-radius:3px;display:inline-block;flex:none}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--surface);font-weight:550;font-size:14px;color:var(--ink);text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--ink-2)}
+.btn svg{width:16px;height:16px}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--gold-ink)}
+.btn.primary:hover{filter:brightness(.96)}
+.btn.dark{background:var(--vault);border-color:var(--vault);color:#fff}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{color:var(--ink);background:var(--surface-2)}
+.btn.sm{height:32px;padding:0 12px;font-size:13px}
+.btn.danger{color:var(--neg)}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.link{background:none;border:0;padding:0;color:var(--brand);font-weight:550;font-size:13.5px;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+
+/* chips */
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 6px;margin:0 -2px 12px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line-2);background:var(--surface);border-radius:999px;height:36px;padding:0 14px;font-weight:550;font-size:14px;color:var(--ink-2);display:inline-flex;align-items:center;gap:7px}
+.chip i{width:6px;height:6px;border-radius:50%;background:var(--line-2)}
+.chip.has i{background:var(--brand-2)}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chip[aria-pressed="true"] i{background:var(--gold)}
+.seg{display:inline-flex;background:var(--sunken);border-radius:999px;padding:3px;gap:2px}
+.seg button{border:0;background:none;height:32px;padding:0 14px;border-radius:999px;font-weight:550;font-size:13.5px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+
+/* forms */
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field>span{font-size:13px;font-weight:550;color:var(--ink-2)}
+.field small{color:var(--muted);font-size:12.5px;line-height:1.4}
+.inp{position:relative;display:flex;align-items:center;background:var(--surface);border:1px solid var(--line-2);border-radius:10px;height:42px;transition:border-color .15s}
+.inp:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
+.inp input,.inp select{border:0;background:none;outline:none;height:100%;width:100%;padding:0 12px;min-width:0;font-variant-numeric:tabular-nums}
+.inp select{appearance:none;padding-right:30px;cursor:pointer}
+.inp.sel::after{content:"";position:absolute;right:13px;top:50%;width:7px;height:7px;border-right:1.6px solid var(--muted);border-bottom:1.6px solid var(--muted);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.inp .pre,.inp .suf{color:var(--muted);font-size:13.5px;padding:0 0 0 12px;white-space:nowrap}
+.inp .suf{padding:0 12px 0 0}
+.inp .pre+input{padding-left:6px}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 16px;align-content:start}
+.form .full{grid-column:1/-1}
+.helper{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+.helper button{border:1px dashed var(--line-2);background:none;border-radius:999px;font-size:12.5px;padding:3px 10px;color:var(--brand);font-weight:550}
+.helper button:hover{border-style:solid}
+
+/* ledger tables */
+.ledger{width:100%;border-collapse:separate;border-spacing:0}
+.lg-group{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);overflow:hidden}
+.lg-group+.lg-group{margin-top:14px}
+.lg-head{display:grid;grid-template-columns:minmax(0,1fr) 150px 150px 120px 36px;gap:10px;align-items:center;padding:14px 16px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.lg-head h3{margin:0;font:650 15.5px/1.2 var(--display);display:flex;align-items:center;gap:9px}
+.lg-title{min-width:0}
+.lg-title small{display:block;color:var(--muted);font-size:12.5px;margin:2px 0 0 18px}
+.lg-head.two{grid-template-columns:minmax(0,1fr) auto}
+.lg-head .t{text-align:right;font-weight:650;font-variant-numeric:tabular-nums;font-size:14px}
+.lg-head .t small{display:block;font-weight:500;color:var(--muted);font-size:11.5px}
+.lg-row{display:grid;grid-template-columns:minmax(0,1fr) 150px 150px 120px 36px;gap:10px;align-items:center;padding:6px 16px;border-bottom:1px solid var(--line)}
+.lg-row:last-of-type{border-bottom:0}
+.lg-row .name input{border:0;background:none;width:100%;padding:8px 0;outline:none;font-weight:500}
+.lg-row .name input:focus{box-shadow:inset 0 -2px 0 var(--gold)}
+.lg-row .inp{height:38px}
+.lg-row .diff{text-align:right;font-variant-numeric:tabular-nums;font-size:14px;font-weight:550}
+.lg-row .x{border:0;background:none;width:32px;height:32px;border-radius:8px;color:var(--muted);display:grid;place-items:center;opacity:.55}
+.lg-row:hover .x,.lg-row .x:focus-visible{opacity:1}
+.lg-row .x:hover{color:var(--neg);background:var(--neg-soft)}
+.lg-row .x svg{width:15px;height:15px}
+.lg-add{padding:8px 16px 12px}
+.lg-cols{display:grid;grid-template-columns:minmax(0,1fr) 150px 150px 120px 36px;gap:10px;padding:0 16px 6px;font-size:12px;color:var(--muted);font-weight:550}
+.lg-cols span:not(:first-child){text-align:right}
+.lg-row.two,.lg-head.two,.lg-cols.two{grid-template-columns:minmax(0,1fr) 180px 80px 36px}
+
+/* data tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table.tbl{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+.tbl th{font-weight:550;color:var(--muted);font-size:12.5px;text-align:right;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--surface-2)}
+.tbl th:first-child,.tbl td:first-child,.tbl th.l{text-align:left}
+.tbl td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tfoot td{font-weight:650;background:var(--surface-2);border-top:1px solid var(--line)}
+.tbl .inp{height:36px;min-width:110px}
+.tbl td.ed{padding:5px 6px}
+.tbl td.ed .inp input{text-align:right}
+.tbl td.ed.l .inp input{text-align:left}
+.tbl tr.yr{cursor:pointer}
+.tbl tr.yr:hover td{background:var(--surface-2)}
+.tbl tr.sub td{color:var(--muted);font-size:13px;background:var(--surface-2)}
+
+/* status */
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--sunken);color:var(--muted);white-space:nowrap}
+.badge.ok{background:var(--pos-soft);color:var(--pos)}
+.badge.bad{background:var(--neg-soft);color:var(--neg)}
+.badge.mid{background:var(--warn-soft);color:var(--warn)}
+.bar{height:8px;border-radius:99px;background:var(--sunken);overflow:hidden;position:relative}
+.bar>i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--brand-2);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.vault .bar{background:rgba(255,255,255,.1)}
+.vault .bar>i{background:var(--gold)}
+
+/* checkup */
+.check{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:4px 16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.check:last-child{border-bottom:0;padding-bottom:2px}
+.check:first-child{padding-top:2px}
+.check h4{margin:0;font-weight:600;font-size:14.5px}
+.check p{margin:0;font-size:12.5px;color:var(--muted)}
+.check .v{text-align:right;font:700 22px/1.1 var(--display);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.check .meter{grid-column:1/-1;margin-top:8px;position:relative;height:10px;border-radius:99px;background:var(--sunken)}
+.check .meter .zone{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--pos) 26%,transparent);border-radius:99px}
+.check .meter .pin{position:absolute;top:-4px;width:4px;height:18px;border-radius:3px;background:var(--ink);transform:translateX(-50%);transition:left .5s cubic-bezier(.2,.8,.2,1)}
+.check .meta{grid-column:1/-1;display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+
+/* charts */
+.chart{width:100%;position:relative}
+.chart svg{display:block;overflow:visible}
+.chart text{font:11.5px var(--body);fill:var(--muted);font-variant-numeric:tabular-nums}
+.chart .grid line{stroke:var(--line);stroke-width:1}
+.chart .axis0{stroke:var(--line-2)}
+.legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.hit{fill:transparent}
+.hit:hover{fill:color-mix(in srgb,var(--ink) 5%,transparent)}
+#tip{position:fixed;z-index:100;pointer-events:none;background:var(--vault);color:#EAF2EC;padding:9px 12px;border-radius:10px;font-size:12.5px;line-height:1.5;box-shadow:0 10px 30px -10px rgba(0,0,0,.5);opacity:0;transform:translateY(4px);transition:opacity .12s,transform .12s;max-width:260px;font-variant-numeric:tabular-nums}
+#tip.on{opacity:1;transform:none}
+#tip b{font-weight:650;color:#fff}
+#tip .tr{display:flex;align-items:center;gap:7px;justify-content:space-between}
+#tip .tr span{display:inline-flex;align-items:center;gap:6px;color:#A9C0B3}
+
+/* empty */
+.empty{border:1px dashed var(--line-2);border-radius:var(--radius);padding:28px;text-align:center;color:var(--muted);background:var(--surface-2)}
+.empty h3{margin:0 0 6px;color:var(--ink);font:650 17px var(--display)}
+.empty p{margin:0 auto 14px;max-width:46ch;font-size:14px}
+
+/* pyramid */
+.pyr{display:flex;flex-direction:column-reverse;align-items:center;gap:6px;padding:8px 0}
+.pyr button{border:0;color:#fff;font-weight:600;font-size:13.5px;height:46px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;gap:10px;position:relative;overflow:hidden;transition:transform .2s}
+.pyr button:hover{transform:scale(1.015)}
+.pyr button .fill{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--gold);transform-origin:left;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.pyr button span{position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pyr button[aria-pressed="true"]{outline:3px solid var(--gold);outline-offset:2px}
+.lvl-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.lvl-item:last-child{border-bottom:0}
+.lvl-item input[type=checkbox]{appearance:none;width:22px;height:22px;border:1.6px solid var(--line-2);border-radius:7px;display:grid;place-items:center;flex:none;cursor:pointer;background:var(--surface)}
+.lvl-item input[type=checkbox]:checked{background:var(--brand);border-color:var(--brand)}
+.lvl-item input[type=checkbox]:checked::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.2px 2.2px 0;transform:translateY(-1px) rotate(45deg)}
+.lvl-item .t{flex:1;border:0;background:none;outline:none;padding:4px 0;min-width:0;resize:none;line-height:1.45;overflow:hidden;font:inherit}
+.lvl-item .t:focus{box-shadow:inset 0 -2px 0 var(--gold)}
+.lvl-item:has(input:checked) .t{color:var(--muted)}
+
+/* goals */
+.goal{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);overflow:hidden}
+.goal-top{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+.goal-top input.title{font:650 18px var(--display);border:0;background:none;outline:none;flex:1;min-width:0;letter-spacing:-.015em}
+.goal-top input.title:focus{box-shadow:inset 0 -2px 0 var(--gold)}
+.goal-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:22px;padding:18px}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.kv>div{padding:12px 14px;border-radius:12px;background:var(--surface-2)}
+.kv .k{font-size:12.5px;color:var(--muted)}
+.kv .v{font:700 19px/1.2 var(--display);margin-top:3px;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.kv .v small{font:500 12.5px var(--body);color:var(--muted);letter-spacing:0}
+.kv .hl{background:var(--vault);color:#E7F0EA}
+.kv .hl .k{color:#9DB6A8}
+
+/* verdict */
+.verdict{display:flex;gap:12px;padding:14px 16px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);font-size:14px}
+.verdict svg{width:20px;height:20px;flex:none;margin-top:1px}
+.verdict.ok{background:var(--pos-soft);border-color:transparent}
+.verdict.ok svg{color:var(--pos)}
+.verdict.bad{background:var(--neg-soft);border-color:transparent}
+.verdict.bad svg{color:var(--neg)}
+.verdict.mid{background:var(--warn-soft);border-color:transparent}
+.verdict.mid svg{color:var(--warn)}
+.verdict b{display:block;margin-bottom:2px}
+
+/* place list */
+.places{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.place{padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.place h4{margin:0 0 4px;font-size:14.5px;font-weight:650;display:flex;gap:8px;align-items:center}
+.place h4 svg{width:16px;height:16px;flex:none;color:var(--pos)}
+.place.no h4 svg{color:var(--neg)}
+.place p{margin:0;font-size:13.5px;color:var(--ink-2)}
+.place .fit{margin-top:8px;font-size:12.5px;color:var(--muted)}
+.place.no{background:var(--surface-2)}
+
+/* ring */
+.ring{position:relative;width:150px;height:150px;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.ring .c b{display:block;font:700 28px/1 var(--display);letter-spacing:-.03em}
+.ring .c small{font-size:12px;color:var(--muted)}
+.vault .ring .c small{color:#9DB6A8}
+
+/* glossary */
+.gl-search{max-width:420px;margin-bottom:18px}
+.gl{columns:2;column-gap:28px}
+.gl dl{break-inside:avoid;margin:0 0 16px;padding:14px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.gl dt{font:650 16px var(--display);margin-bottom:4px}
+.gl dd{margin:0;color:var(--ink-2);font-size:14px}
+
+/* modal + toast */
+.scrim{position:fixed;inset:0;z-index:80;background:rgba(6,14,10,.55);display:grid;place-items:center;padding:16px;animation:fade .18s}
+.modal{background:var(--surface);color:var(--ink);border-radius:20px;width:min(520px,100%);max-height:calc(100dvh - 32px);overflow:auto;padding:26px;box-shadow:0 30px 80px -20px rgba(0,0,0,.5);animation:pop .22s cubic-bezier(.2,.8,.2,1)}
+.modal h2{margin:0 0 8px;font:700 24px/1.15 var(--display);letter-spacing:-.025em}
+.modal p{margin:0 0 16px;color:var(--ink-2)}
+.modal .acts{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px}
+.welcome{background:var(--vault);color:#E7F0EA;position:relative;overflow:hidden;padding:30px}
+.welcome .rosette{position:absolute;right:-140px;top:-140px;width:380px;height:380px;opacity:.35;pointer-events:none}
+.welcome h2{font-size:30px;position:relative}
+.welcome p{color:#B3C7BB;position:relative}
+.welcome .inp{background:var(--vault-2);border-color:var(--vault-line);color:#fff}
+.welcome .field>span{color:#B3C7BB}
+.welcome .btn:not(.primary){background:transparent;color:#E7F0EA;border-color:var(--vault-line)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:90;background:var(--vault);color:#EAF2EC;border-radius:999px;padding:8px 8px 8px 18px;display:flex;gap:12px;align-items:center;box-shadow:0 14px 40px -12px rgba(0,0,0,.5);font-size:14px;animation:up .25s cubic-bezier(.2,.8,.2,1)}
+.toast button{background:var(--gold);color:var(--gold-ink);border:0;border-radius:999px;height:32px;padding:0 14px;font-weight:600;font-size:13px}
+.toast.plain{padding:12px 18px}
+@keyframes fade{from{opacity:0}}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}}
+@keyframes up{from{opacity:0;transform:translate(-50%,10px)}}
+
+.view{animation:viewin .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes viewin{from{opacity:0;transform:translateY(6px)}}
+.note{font-size:13px;color:var(--muted);display:flex;gap:8px;align-items:flex-start}
+.note svg{width:16px;height:16px;flex:none;margin-top:2px}
+.callout{padding:12px 14px;border-radius:12px;background:var(--gold-soft);color:var(--ink);font-size:13.5px}
+.tabbar{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto;scrollbar-width:none}
+.tabbar::-webkit-scrollbar{display:none}
+.tabbar button{border:0;background:none;padding:10px 14px;font-weight:550;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:inline-flex;align-items:center;gap:8px}
+.tabbar button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tabbar button small{font-weight:500;color:var(--muted);font-size:12px}
+.alloc{display:flex;flex-direction:column;gap:10px}
+.alloc .r{display:grid;grid-template-columns:12px minmax(0,1fr) auto 44px;align-items:center;gap:10px;font-size:14px}
+.alloc .r>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alloc .r b{font-weight:600;font-variant-numeric:tabular-nums}
+.alloc .r em{font-style:normal;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
+
+.demo-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:4px clamp(16px,3vw,36px) 10px;padding:10px 12px 10px 16px;border-radius:14px;background:var(--gold-soft);font-size:14px;max-width:calc(1280px - 2*clamp(16px,3vw,36px))}
+.demo-bar span{flex:1;min-width:200px}
+.welcome .acts .btn.primary{color:var(--gold-ink)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1100px){
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .split{grid-template-columns:1fr}
+  .goal-body{grid-template-columns:1fr}
+}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{display:none}
+  .top{padding:12px 16px}
+  .top .m-brand{display:flex;align-items:center}
+  .top .m-brand svg{width:30px;height:30px}
+  .content{padding:4px 16px 110px}
+  .g2,.g3{grid-template-columns:1fr}
+  .form{grid-template-columns:1fr}
+  .places{grid-template-columns:1fr}
+  .gl{columns:1}
+  .tabs{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:40;background:color-mix(in srgb,var(--vault) 94%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;padding:6px;box-shadow:0 16px 40px -14px rgba(0,0,0,.55)}
+  .tabs a,.tabs button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 0 6px;border-radius:14px;color:#9DB6A8;text-decoration:none;font-size:11px;font-weight:550;border:0;background:none}
+  .tabs svg{width:20px;height:20px}
+  .tabs [aria-current="page"]{color:#fff;background:var(--vault-3)}
+  .tabs [aria-current="page"] svg{color:var(--gold)}
+  .toast{bottom:96px}
+  .lg-head,.lg-row,.lg-cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 30px}
+  .lg-cols{display:none}
+  .lg-head{grid-template-columns:minmax(0,1fr) auto;row-gap:2px}
+  .lg-title small{margin-left:18px}
+  .lg-head .t.p,.lg-head .t.d,.lg-head .sp{display:none}
+  .lg-row{grid-template-areas:"n n x" "p a a" "d d d";padding:10px 14px;row-gap:6px}
+  .lg-row .name{grid-area:n}
+  .lg-row .x{grid-area:x}
+  .lg-row .p{grid-area:p}
+  .lg-row .a{grid-area:a}
+  .lg-row .diff{grid-area:d;text-align:left;font-size:12.5px}
+  .lg-row .diff:empty{display:none}
+  .lg-row:not(.two) .diff::before{content:"Selisih: ";color:var(--muted);font-weight:500}
+  .lg-row .p::before,.lg-row .a::before{content:attr(data-l);display:block;font-size:11.5px;color:var(--muted);margin-bottom:3px;font-weight:550}
+  .lg-row.two{grid-template-areas:"n n x" "p p p";grid-template-columns:minmax(0,1fr) auto 30px}
+  .lg-row.two .pct{display:none}
+  .kv{grid-template-columns:1fr 1fr}
+  .check{grid-template-columns:minmax(0,1fr) 90px}
+  .ring{width:120px;height:120px}
+  .modal{padding:22px}
+  .welcome{padding:24px}
+}
+@media (max-width:420px){
+  .g4{grid-template-columns:1fr 1fr}
+  .metric .val{font-size:22px}
+  .top h1{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+@media print{
+  .side,.tabs,.top .year,.top .icon-btn{display:none}
+  .shell{display:block}
+}
+
+</style>
+</head>
+<body>
+<noscript>ur.financialguy butuh JavaScript untuk berjalan.</noscript>
+<script>
+(()=>{
+'use strict';
+/* ============ utils ============ */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const uid = () => Math.random().toString(36).slice(2, 9);
+const isNum = (v) => typeof v === 'number' && isFinite(v);
+const sumN = (...xs) => { let s = null; for (const x of xs) if (isNum(x)) s = (s || 0) + x; return s; };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const MONTHS = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+const mkey = (y, m) => y + '-' + String(m + 1).padStart(2, '0');
+const NOW = new Date();
+const CUR_Y = NOW.getFullYear(), CUR_M = NOW.getMonth();
+
+/* ============ format ============ */
+const nf0 = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 });
+const nfd = (d) => new Intl.NumberFormat('id-ID', { maximumFractionDigits: d });
+const MINUS = '−';
+function rp(n, opt = {}) {
+  if (!isNum(n)) return opt.dash === false ? '' : '–';
+  const s = nf0.format(Math.round(Math.abs(n)));
+  const sign = n < 0 && Math.round(n) !== 0 ? MINUS : (opt.plus && n > 0 ? '+' : '');
+  return sign + 'Rp' + s;
+}
+function compact(n, unit = true) {
+  if (!isNum(n)) return '–';
+  const a = Math.abs(n), s = n < 0 ? MINUS : '';
+  const t = (x) => nfd(x < 10 ? 2 : x < 100 ? 1 : 0).format(x);
+  if (a >= 1e12) return s + t(a / 1e12) + (unit ? ' T' : 'T');
+  if (a >= 1e9) return s + t(a / 1e9) + (unit ? ' M' : 'M');
+  if (a >= 1e6) return s + t(a / 1e6) + (unit ? ' jt' : 'jt');
+  if (a >= 1e3) return s + t(a / 1e3) + (unit ? ' rb' : 'rb');
+  return s + nf0.format(a);
+}
+const rpc = (n) => isNum(n) ? (n < 0 ? MINUS : '') + 'Rp' + compact(Math.abs(n)) : '–';
+function pctf(x, d = 1, plus = false) {
+  if (!isNum(x)) return '–';
+  const v = x * 100;
+  return (v < 0 ? MINUS : plus && v > 0 ? '+' : '') + nfd(d).format(Math.abs(v)) + '%';
+}
+function usd(n) { if (!isNum(n)) return '–'; return (n < 0 ? MINUS : '') + '$' + new Intl.NumberFormat('en-US', { maximumFractionDigits: 2, minimumFractionDigits: Math.abs(n) < 1000 ? 2 : 0 }).format(Math.abs(n)); }
+function dur(months) {
+  if (!isNum(months)) return '–';
+  const m = Math.ceil(months - 1e-9);
+  const y = Math.floor(m / 12), r = m % 12;
+  if (y && r) return `${y} th ${r} bln`;
+  if (y) return `${y} tahun`;
+  return `${r} bulan`;
+}
+function addMonths(n) { const d = new Date(CUR_Y, CUR_M + Math.ceil(n), 1); return MONTHS[d.getMonth()] + ' ' + d.getFullYear(); }
+const tone = (n, invert) => !isNum(n) || Math.round(n) === 0 ? '' : ((n > 0) !== !!invert ? 'pos' : 'neg');
+
+/* ============ parse ============ */
+function parseMoney(str) {
+  const neg = /^\s*[-−]/.test(str);
+  const d = String(str).replace(/[^\d]/g, '');
+  if (!d) return null;
+  return (neg ? -1 : 1) * Number(d);
+}
+function parseDec(str) {
+  let s = String(str).trim().replace(/\s/g, '');
+  if (!s) return null;
+  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+  s = s.replace(/[^\d.\-]/g, '');
+  const v = parseFloat(s);
+  return isFinite(v) ? v : null;
+}
+const dispMoney = (v) => isNum(v) ? (v < 0 ? '-' : '') + nf0.format(Math.abs(v)) : '';
+const dispDec = (v, d = 8) => isNum(v) ? nfd(d).format(v).replace(/\.(?=\d{3})/g, '.') : '';
+const dispPct = (v) => isNum(v) ? nfd(4).format(+(v * 100).toFixed(6)) : '';
+
+/* ============ icons ============ */
+const IP = {
+  home: '<path d="M4 15a8 8 0 0 1 16 0"/><path d="M12 15l4.2-5"/><circle cx="12" cy="15" r="1.3"/><path d="M3 19.5h18"/>',
+  pyr: '<path d="M12 3.5 2.8 20h18.4z"/><path d="M7.4 12.2h9.2M5.1 16.2h13.8"/>',
+  flow: '<path d="M7 20V5M3.5 8.5 7 5l3.5 3.5"/><path d="M17 4v15M13.5 15.5 17 19l3.5-3.5"/>',
+  worth: '<ellipse cx="12" cy="6" rx="7" ry="2.7"/><path d="M5 6v4.4c0 1.5 3.1 2.7 7 2.7s7-1.2 7-2.7V6"/><path d="M5 10.4v4.4c0 1.5 3.1 2.7 7 2.7s7-1.2 7-2.7v-4.4"/><path d="M5 14.8v3c0 1.5 3.1 2.7 7 2.7s7-1.2 7-2.7v-3"/>',
+  shield: '<path d="M3.5 12a8.5 8.5 0 0 1 17 0z"/><path d="M12 12v6.2a2 2 0 0 1-4 0"/><path d="M12 3.5V2.6"/>',
+  house: '<path d="M3.5 10.5 12 4l8.5 6.5"/><path d="M5.5 9v11h13V9"/><path d="M10 20v-5.5h4V20"/>',
+  goal: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1"/>',
+  trend: '<path d="M3 17l5.5-5.5 4 4L21 7"/><path d="M15 7h6v6"/>',
+  scale: '<path d="M12 4v16M8 20h8"/><path d="M5 7.5h14"/><path d="M5 7.5 2.6 13.2a2.5 2.5 0 0 0 4.8 0z"/><path d="M19 7.5l-2.4 5.7a2.5 2.5 0 0 0 4.8 0z"/>',
+  hour: '<path d="M6 3h12M6 21h12"/><path d="M7.5 3v2.6c0 2.6 4.5 4.3 4.5 6.4s-4.5 3.8-4.5 6.4V21M16.5 3v2.6c0 2.6-4.5 4.3-4.5 6.4s4.5 3.8 4.5 6.4V21"/>',
+  book: '<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15.5H6.5A1.5 1.5 0 0 0 5 20z"/><path d="M5 20a1.5 1.5 0 0 0 1.5 1.5H19"/><path d="M9 7.5h6"/>',
+  db: '<ellipse cx="12" cy="5.5" rx="7.5" ry="2.7"/><path d="M4.5 5.5v13c0 1.5 3.4 2.7 7.5 2.7s7.5-1.2 7.5-2.7v-13"/><path d="M4.5 12c0 1.5 3.4 2.7 7.5 2.7s7.5-1.2 7.5-2.7"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  left: '<path d="M14.5 6 8.5 12l6 6"/>',
+  right: '<path d="M9.5 6l6 6-6 6"/>',
+  down: '<path d="M6 9.5l6 6 6-6"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+  moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+  check: '<path d="M4.5 12.5 9.5 17.5 19.5 7"/>',
+  alert: '<path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.2v.3"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.3"/>',
+  copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/>',
+  dl: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M4.5 19.5h15"/>',
+  ul: '<path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M4.5 19.5h15"/>',
+  sync: '<path d="M20 11a8 8 0 0 0-14.5-4.5L3.5 9"/><path d="M3.5 4v5h5"/><path d="M4 13a8 8 0 0 0 14.5 4.5l2-2.5"/><path d="M20.5 20v-5h-5"/>',
+  menu: '<circle cx="6" cy="6" r="1.6"/><circle cx="12" cy="6" r="1.6"/><circle cx="18" cy="6" r="1.6"/><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/><circle cx="6" cy="18" r="1.6"/><circle cx="12" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/>',
+  trash: '<path d="M4.5 7h15M10 11v6M14 11v6"/><path d="M6.5 7l.9 12a1.8 1.8 0 0 0 1.8 1.6h5.6a1.8 1.8 0 0 0 1.8-1.6l.9-12"/><path d="M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+};
+const ic = (n, cls = '') => `<svg class="${cls}" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IP[n] || ''}</svg>`;
+const LOGO = `<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#0D1B16"/><g fill="none" stroke="#FFC81E" stroke-width="1.35">${[0, 1, 2, 3, 4, 5, 6, 7].map((k) => { const a = k * Math.PI / 4; return `<circle cx="${(20 + 4.6 * Math.cos(a)).toFixed(2)}" cy="${(20 + 4.6 * Math.sin(a)).toFixed(2)}" r="7.4"/>`; }).join('')}</g><circle cx="20" cy="20" r="2.2" fill="#FFC81E"/></svg>`;
+
+/* guilloche rosette (banknote security-print feel) */
+const _ros = {};
+function rosette(cls = 'rosette', color = '#FFC81E') {
+  if (!_ros[color]) {
+    const layers = [[96, 36, 64, 0, 1], [96, 36, 50, 22.5, .82], [80, 30, 58, 11, .64]];
+    let paths = '';
+    for (const [R, r, d, rot, sc] of layers) {
+      const g = gcd(R, r), T = 2 * Math.PI * r / g, n = 1100; let p = '';
+      for (let i = 0; i <= n; i++) {
+        const t = T * i / n;
+        let x = (R - r) * Math.cos(t) + d * Math.cos((R - r) / r * t);
+        let y = (R - r) * Math.sin(t) - d * Math.sin((R - r) / r * t);
+        const a = rot * Math.PI / 180, xx = x * Math.cos(a) - y * Math.sin(a), yy = x * Math.sin(a) + y * Math.cos(a);
+        p += (i ? 'L' : 'M') + (150 + xx * sc).toFixed(1) + ' ' + (150 + yy * sc).toFixed(1);
+      }
+      paths += `<path d="${p}"/>`;
+    }
+    _ros[color] = `<g fill="none" stroke="${color}" stroke-width=".7">${paths}<circle cx="150" cy="150" r="140"/><circle cx="150" cy="150" r="146" stroke-dasharray="2 3"/></g>`;
+  }
+  return `<svg class="${cls}" viewBox="0 0 300 300" aria-hidden="true">${_ros[color]}</svg>`;
+}
+function gcd(a, b) { return b ? gcd(b, a % b) : a; }
+
+/* ============ state ============ */
+const KEY = 'urfg:v1';
+let canStore = true;
+const BUD_GROUPS = [
+  { k: 'income', name: 'Uang masuk', sub: 'gaji, usaha, dividen', color: 'var(--c-income)', inflow: true },
+  { k: 'living', name: 'Biaya hidup', sub: 'kebutuhan sehari-hari', color: 'var(--c-living)' },
+  { k: 'debt', name: 'Kewajiban', sub: 'cicilan, premi, tagihan', color: 'var(--c-debt)' },
+  { k: 'future', name: 'Masa depan', sub: 'investasi & tabungan', color: 'var(--c-future)' },
+];
+const W_GROUPS = [
+  { k: 'cash', name: 'Kas & setara kas', sub: 'rekening, e-wallet, tunai', color: 'var(--c-living)' },
+  { k: 'invest', name: 'Aset investasi', sub: 'reksa dana, saham, emas, kripto', color: 'var(--c-future)' },
+  { k: 'fixed', name: 'Aset tetap', sub: 'rumah, kendaraan, gadget', color: 'var(--c-gold)' },
+  { k: 'other', name: 'Aset lainnya', sub: 'piutang, saldo BPJS TK', color: 'var(--c-plum)' },
+  { k: 'liab', name: 'Kewajiban', sub: 'sisa utang yang belum lunas', color: 'var(--c-debt)', liab: true },
+];
+const rows = (...names) => names.map((name) => ({ id: uid(), name }));
+const PYR = [
+  { s: 'Penghasilan stabil', t: 'Penghasilan stabil', d: 'Ada uang masuk yang bisa diandalkan tiap bulan.', link: 'arus-kas', items: ['Penghasilan rutin 3 bulan berturut-turut', 'Penghasilan rutin 6 bulan berturut-turut', 'Penghasilan rutin 12 bulan berturut-turut', 'Punya minimal satu sumber penghasilan tambahan'] },
+  { s: 'Arus kas positif', t: 'Arus kas positif', d: 'Pemasukan selalu lebih besar dari pengeluaran.', link: 'arus-kas', items: ['Pemasukan lebih besar dari pengeluaran 3 bulan terakhir', 'Pemasukan lebih besar dari pengeluaran 6 bulan terakhir', 'Pemasukan lebih besar dari pengeluaran 12 bulan terakhir', 'Rutin mencatat dan mengevaluasi pengeluaran tiap bulan'] },
+  { s: 'Dana darurat', t: 'Dana darurat', d: 'Bantalan uang tunai untuk kejadian tak terduga.', link: 'dana-darurat', items: ['Terkumpul 3× pengeluaran bulanan', 'Terkumpul 6× pengeluaran bulanan', 'Terkumpul 12× pengeluaran bulanan'] },
+  { s: 'Proteksi', t: 'Proteksi', d: 'Risiko besar dipindahkan ke asuransi.', link: 'kekayaan', items: ['Terdaftar BPJS Kesehatan', 'Punya asuransi kesehatan tambahan bila perlu', 'Punya asuransi jiwa bila ada yang bergantung padamu', 'Aset penting seperti rumah atau kendaraan sudah diasuransikan'] },
+  { s: 'Tujuan', t: 'Tujuan keuangan', d: 'Rumah, pendidikan, ibadah, liburan, semuanya punya rencana.', link: 'tujuan', items: ['Setiap tujuan ditulis lengkap dengan nominal dan tenggat', 'Ada tabungan rutin untuk tiap tujuan'] },
+  { s: 'Investasi', t: 'Investasi & penghasilan pasif', d: 'Uang ikut bekerja, bukan hanya kamu.', link: 'investasi', items: ['Punya minimal satu aset investasi aktif', 'Punya penghasilan pasif, misalnya dividen, kupon, atau sewa', 'Aset investasi mencapai 25× pengeluaran tahunan (aturan 4%)'] },
+  { s: 'Warisan', t: 'Warisan & distribusi aset', d: 'Yang kamu bangun sampai ke orang yang tepat.', link: 'pensiun', items: ['Punya surat wasiat atau rencana pembagian aset tertulis', 'Ahli waris tahu daftar aset dan cara mengaksesnya'] },
+];
+function fresh() {
+  return {
+    v: 1, seen: false, demo: false, name: '', theme: 'auto', year: CUR_Y,
+    ui: { bMonth: CUR_M, wMonth: CUR_M, invTab: 'rd', rebMode: 1 },
+    pyramid: PYR.map((l) => ({ id: uid(), items: l.items.map((text) => ({ id: uid(), text, done: false })) })),
+    budget: {
+      rows: {
+        income: rows('Gaji', 'Penghasilan sampingan', 'Bunga & kupon obligasi', 'Dividen saham', 'Pemasukan lain'),
+        living: rows('Makan & minum', 'Tempat tinggal (sewa/kos)', 'Transportasi', 'Internet & pulsa', 'Listrik & air', 'Belanja bulanan', 'Perawatan diri', 'Langganan digital', 'Hiburan & nongkrong', 'Biaya hidup lain'),
+        debt: rows('Cicilan kendaraan', 'Cicilan rumah (KPR)', 'Kartu kredit & paylater', 'Iuran BPJS Kesehatan', 'Premi asuransi', 'Kewajiban lain'),
+        future: rows('Investasi', 'Tabungan dana darurat', 'Tabungan tujuan'),
+      }, data: {},
+    },
+    worth: {
+      rows: {
+        cash: rows('Rekening utama', 'Rekening tabungan', 'Dana darurat', 'E-wallet & tunai'),
+        invest: rows('Reksa dana', 'Saham Indonesia', 'Saham US', 'Kripto', 'Emas'),
+        fixed: rows('Rumah / tanah', 'Kendaraan', 'Gadget & elektronik'),
+        other: rows('Piutang', 'Saldo BPJS Ketenagakerjaan'),
+        liab: rows('Utang jangka pendek', 'Sisa pokok KPR', 'Sisa cicilan kendaraan', 'Kartu kredit & paylater'),
+      }, data: {},
+    },
+    emergency: { monthly: null, months: 6, current: null, saving: null },
+    kpr: { price: null, dp: 0.2, years: 15, rateFix: null, fixYears: 3, rateFloat: null, income: null, other: null, start: '', newHome: true, npoptkp: 60000000, bphtb: 0.05, ppnDisc: 0, ajb: 0.01, bbn: 0.02, notary: null, booking: null, provisi: 0.01, appraisal: null, bankOther: null },
+    goals: [],
+    invest: { usdidr: null, rd: [], idx: [], us: [], crypto: [], other: [] },
+    rebal: { rows: [] },
+    retire: { age: null, retireAge: 55, monthly: null, inflation: 0.03, current: null, saving: null, ret: 0.06, wr: 0.04 },
+  };
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return fresh();
+    return migrate(JSON.parse(raw));
+  } catch (e) { canStore = false; return fresh(); }
+}
+function migrate(s) {
+  const f = fresh();
+  const out = Object.assign(f, s);
+  out.ui = Object.assign(f.ui, s.ui || {});
+  out.kpr = Object.assign(fresh().kpr, s.kpr || {});
+  out.retire = Object.assign(fresh().retire, s.retire || {});
+  out.emergency = Object.assign(fresh().emergency, s.emergency || {});
+  out.invest = Object.assign(fresh().invest, s.invest || {});
+  return out;
+}
+let S = load();
+let saveT;
+function save(now) {
+  clearTimeout(saveT);
+  const go = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { canStore = false; } };
+  if (now) go(); else saveT = setTimeout(go, 250);
+}
+addEventListener('pagehide', () => save(true));
+
+/* path get/set: segments resolve array items by id */
+function getAt(path) {
+  let o = S;
+  for (const k of path.split('.')) { if (o == null) return undefined; o = Array.isArray(o) ? o.find((x) => x.id === k) : o[k]; }
+  return o;
+}
+function setAt(path, v) {
+  const ks = path.split('.'); let o = S;
+  for (let i = 0; i < ks.length - 1; i++) {
+    const k = ks[i];
+    let n = Array.isArray(o) ? o.find((x) => x.id === k) : o[k];
+    if (n == null) { n = {}; o[k] = n; }
+    o = n;
+  }
+  o[ks.at(-1)] = v;
+}
+
+/* ============ input builders ============ */
+function money(path, o = {}) {
+  const v = getAt(path);
+  return `<div class="inp ${o.cls || ''}">${o.bare ? '' : '<span class="pre">Rp</span>'}<input inputmode="numeric" autocomplete="off" data-b="${path}" data-kind="money"${o.neg ? ' data-neg' : ''} value="${dispMoney(v)}" placeholder="${o.ph ?? '0'}" aria-label="${esc(o.label || '')}"></div>`;
+}
+function pctIn(path, o = {}) {
+  return `<div class="inp ${o.cls || ''}"><input inputmode="decimal" autocomplete="off" data-b="${path}" data-kind="pct" value="${dispPct(getAt(path))}" placeholder="${o.ph ?? '0'}" aria-label="${esc(o.label || '')}"><span class="suf">${o.suf || '%'}</span></div>`;
+}
+function decIn(path, o = {}) {
+  return `<div class="inp ${o.cls || ''}">${o.pre ? `<span class="pre">${o.pre}</span>` : ''}<input inputmode="decimal" autocomplete="off" data-b="${path}" data-kind="dec" value="${dispDec(getAt(path), o.d ?? 8)}" placeholder="${o.ph ?? '0'}" aria-label="${esc(o.label || '')}">${o.suf ? `<span class="suf">${o.suf}</span>` : ''}</div>`;
+}
+function textIn(path, o = {}) {
+  return `<div class="inp ${o.cls || ''}"><input data-b="${path}" data-kind="text" value="${esc(getAt(path) ?? '')}" placeholder="${esc(o.ph || '')}" ${o.list ? `list="${o.list}"` : ''} aria-label="${esc(o.label || '')}" ${o.upper ? 'data-upper' : ''}></div>`;
+}
+function selIn(path, opts, o = {}) {
+  const v = getAt(path);
+  return `<div class="inp sel ${o.cls || ''}"><select data-b="${path}" data-kind="${o.kind || 'text'}" aria-label="${esc(o.label || '')}">${opts.map((x) => { const [val, lab] = Array.isArray(x) ? x : [x, x]; return `<option value="${esc(val)}" ${String(v) === String(val) ? 'selected' : ''}>${esc(lab)}</option>`; }).join('')}</select></div>`;
+}
+const field = (label, input, help = '', cls = '') => `<label class="field ${cls}"><span>${label}</span>${input}${help ? `<small>${help}</small>` : ''}</label>`;
+
+function autosize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+function onInput(e) {
+  const el = e.target;
+  if (el.tagName === 'TEXTAREA') autosize(el);
+  if (!el.dataset || !el.dataset.b) return;
+  const kind = el.dataset.kind;
+  let v;
+  if (kind === 'money') {
+    const pos = el.selectionStart ?? el.value.length;
+    const before = el.value.slice(0, pos).replace(/[^\d]/g, '').length;
+    const neg = el.hasAttribute('data-neg') && /^\s*[-−]/.test(el.value);
+    let digits = el.value.replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '');
+    if (digits.length > 16) digits = digits.slice(0, 16);
+    const f = digits ? (neg ? '-' : '') + nf0.format(Number(digits)) : (neg ? '-' : '');
+    if (el.value !== f) {
+      el.value = f;
+      let i = 0, c = 0; if (neg) i = 1;
+      for (; i < f.length && c < before; i++) if (/\d/.test(f[i])) c++;
+      try { el.setSelectionRange(i, i); } catch (_) { }
+    }
+    v = digits ? (neg ? -1 : 1) * Number(digits) : null;
+  } else if (kind === 'pct') { const d = parseDec(el.value); v = d == null ? null : d / 100; }
+  else if (kind === 'dec') v = parseDec(el.value);
+  else if (kind === 'int') { const d = parseDec(el.value); v = d == null ? null : Math.round(d); }
+  else if (kind === 'bool') v = el.checked;
+  else { v = el.value; if (el.hasAttribute('data-upper')) { v = v.toUpperCase(); } }
+  setAt(el.dataset.b, v);
+  save();
+  if (el.dataset.re != null) rerender(); else refresh();
+}
+document.addEventListener('input', onInput);
+document.addEventListener('change', (e) => { if (e.target.tagName === 'SELECT' || e.target.type === 'checkbox') onInput(e); });
+document.addEventListener('focusin', (e) => { const el = e.target; if (el.dataset && el.dataset.kind && el.dataset.kind !== 'text' && el.select) setTimeout(() => { try { el.select(); } catch (_) { } }, 0); });
+
+/* ============ charts ============ */
+function ticks(min, max, count = 4) {
+  if (min === max) { if (max === 0) max = 1; else if (max > 0) min = 0; else max = 0; }
+  const span = max - min, raw = span / count, mag = 10 ** Math.floor(Math.log10(raw)), e = raw / mag;
+  const step = (e >= 7.5 ? 10 : e >= 3.5 ? 5 : e >= 1.5 ? 2 : 1) * mag;
+  const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step, out = [];
+  for (let v = lo; v <= hi + step / 2; v += step) out.push(+v.toFixed(6));
+  return out;
+}
+const tipRow = (color, label, val) => `<div class='tr'><span><i class='dot' style='background:${color}'></i>${esc(label)}</span><b>${val}</b></div>`;
+function barChart({ labels, series, stacked = false, h = 230, w = 600, fmt = compact, tipFmt = rp }) {
+  const padL = 44, padR = 6, padT = 10, padB = 24, pw = w - padL - padR, ph = h - padT - padB, n = labels.length;
+  let lo = 0, hi = 0;
+  labels.forEach((_, i) => {
+    if (stacked) { let p = 0, q = 0; series.forEach((s) => { const v = s.values[i]; if (isNum(v)) v >= 0 ? p += v : q += v; }); hi = Math.max(hi, p); lo = Math.min(lo, q); }
+    else series.forEach((s) => { const v = s.values[i]; if (isNum(v)) { hi = Math.max(hi, v); lo = Math.min(lo, v); } });
+  });
+  const tk = ticks(lo, hi); lo = tk[0]; hi = tk.at(-1);
+  const y = (v) => padT + ph - (v - lo) / (hi - lo) * ph;
+  const gw = pw / n, inner = gw * (stacked ? .56 : .74), bw = stacked ? inner : inner / series.length;
+  let g = `<g class="grid">${tk.map((t) => `<line x1="${padL}" x2="${w - padR}" y1="${y(t)}" y2="${y(t)}"/><text x="${padL - 8}" y="${y(t) + 4}" text-anchor="end">${fmt(t, false)}</text>`).join('')}</g>`;
+  let bars = '', hits = '';
+  labels.forEach((lab, i) => {
+    const x0 = padL + gw * i + (gw - inner) / 2; let pos = 0, neg = 0; let tip = `<b>${esc(lab)}</b>`;
+    series.forEach((s, j) => {
+      const v = s.values[i]; if (!isNum(v)) return;
+      tip += tipRow(s.color, s.name, tipFmt(v));
+      let yt, yb;
+      if (stacked) { if (v >= 0) { yb = y(pos); pos += v; yt = y(pos); } else { yt = y(neg); neg += v; yb = y(neg); } }
+      else { yt = y(Math.max(v, 0)); yb = y(Math.min(v, 0)); }
+      const x = stacked ? x0 : x0 + j * bw, hh = Math.max(yb - yt, v === 0 ? 0 : 1.5);
+      const r = Math.min(4, bw / 2 - 1, hh / 2);
+      bars += `<rect x="${x.toFixed(1)}" y="${yt.toFixed(1)}" width="${Math.max(bw - (stacked ? 0 : 2), 1).toFixed(1)}" height="${hh.toFixed(1)}" rx="${Math.max(r, 0).toFixed(1)}" fill="${s.color}" opacity="${s.opacity ?? 1}"/>`;
+    });
+    hits += `<rect class="hit" x="${padL + gw * i}" y="${padT}" width="${gw}" height="${ph}" rx="6" data-tip="${tip}"/>`;
+    if (n <= 12 || i % Math.ceil(n / 12) === 0) g += `<text x="${padL + gw * i + gw / 2}" y="${h - 6}" text-anchor="middle">${esc(lab)}</text>`;
+  });
+  if (lo < 0) g += `<line class="axis0" x1="${padL}" x2="${w - padR}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line-2)"/>`;
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${g}${hits}${bars.replace(/<rect /g, '<rect pointer-events="none" ')}</svg>`;
+}
+function lineChart({ labels, series, h = 230, w = 600, fmt = compact, tipFmt = rp, zero = true, every }) {
+  const padL = 44, padR = 10, padT = 12, padB = 24, pw = w - padL - padR, ph = h - padT - padB, n = labels.length;
+  let lo = zero ? 0 : Infinity, hi = zero ? 0 : -Infinity;
+  series.forEach((s) => s.values.forEach((v) => { if (isNum(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v); } }));
+  if (!isFinite(lo)) { lo = 0; hi = 1; }
+  const tk = ticks(lo, hi); lo = tk[0]; hi = tk.at(-1);
+  const x = (i) => padL + (n === 1 ? pw / 2 : pw * i / (n - 1));
+  const y = (v) => padT + ph - (v - lo) / (hi - lo) * ph;
+  let g = `<g class="grid">${tk.map((t) => `<line x1="${padL}" x2="${w - padR}" y1="${y(t)}" y2="${y(t)}"/><text x="${padL - 8}" y="${y(t) + 4}" text-anchor="end">${fmt(t, false)}</text>`).join('')}</g>`;
+  const step = every || Math.ceil(n / Math.max(2, Math.floor(pw / 56)));
+  labels.forEach((lab, i) => { if (i % step === 0 || i === n - 1 && n < 14) g += `<text x="${x(i)}" y="${h - 6}" text-anchor="middle">${esc(lab)}</text>`; });
+  let lines = '';
+  series.forEach((s) => {
+    let d = '', area = '', seg = [];
+    const flush = () => { if (seg.length) { d += seg.map((p, k) => (k ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(''); if (s.area && seg.length > 1) area += `M${seg[0][0].toFixed(1)} ${y(Math.max(lo, 0))}` + seg.map((p) => `L${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join('') + `L${seg.at(-1)[0].toFixed(1)} ${y(Math.max(lo, 0))}Z`; } seg = []; };
+    s.values.forEach((v, i) => { if (isNum(v)) seg.push([x(i), y(v)]); else flush(); });
+    flush();
+    if (area) lines += `<path d="${area}" fill="${s.color}" opacity=".12"/>`;
+    lines += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s.width || 2.2}" stroke-linejoin="round" stroke-linecap="round" ${s.dash ? `stroke-dasharray="${s.dash}"` : ''}/>`;
+    if (s.dots) s.values.forEach((v, i) => { if (isNum(v)) lines += `<circle cx="${x(i)}" cy="${y(v)}" r="3.2" fill="var(--surface)" stroke="${s.color}" stroke-width="2"/>`; });
+  });
+  let hits = '';
+  const hw = n > 1 ? pw / (n - 1) : pw;
+  labels.forEach((lab, i) => {
+    let tip = `<b>${esc(lab)}</b>`; let any = false;
+    series.forEach((s) => { const v = s.values[i]; if (isNum(v)) { any = true; tip += tipRow(s.color, s.name, tipFmt(v)); } });
+    if (any) hits += `<rect class="hit" x="${(x(i) - hw / 2).toFixed(1)}" y="${padT}" width="${hw.toFixed(1)}" height="${ph}" data-tip="${tip}"/>`;
+  });
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${g}${hits}<g pointer-events="none">${lines}</g></svg>`;
+}
+function donut(items, { size = 170, th = 22, center = '' } = {}) {
+  const total = items.reduce((a, b) => a + Math.max(b.value, 0), 0);
+  const r = (size - th) / 2, c = 2 * Math.PI * r; let off = 0, segs = '';
+  if (total > 0) items.forEach((it) => {
+    const v = Math.max(it.value, 0); if (!v) return; const len = v / total * c;
+    segs += `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${it.color}" stroke-width="${th}" stroke-dasharray="${Math.max(len - 2, .5)} ${c}" stroke-dashoffset="${-off}" data-tip="<b>${esc(it.label)}</b>${tipRow(it.color, pctf(v / total), rp(v))}" style="cursor:default"/>`;
+    off += len;
+  });
+  else segs = `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--sunken)" stroke-width="${th}"/>`;
+  return `<div style="position:relative;width:${size}px;height:${size}px;flex:none"><svg width="${size}" height="${size}" style="transform:rotate(-90deg)">${segs}</svg><div style="position:absolute;inset:0;display:grid;place-items:center;text-align:center;pointer-events:none">${center}</div></div>`;
+}
+function ring(frac, size = 150, color = 'var(--gold)', track = 'rgba(255,255,255,.12)', th = 12) {
+  const r = (size - th) / 2, c = 2 * Math.PI * r, f = clamp(frac || 0, 0, 1);
+  return `<svg width="${size}" height="${size}"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${track}" stroke-width="${th}"/><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${color}" stroke-width="${th}" stroke-linecap="round" stroke-dasharray="${(c * f).toFixed(1)} ${c}" style="transition:stroke-dasharray .6s cubic-bezier(.2,.8,.2,1)"/></svg>`;
+}
+const legend = (items) => `<div class="legend">${items.map(([c, l]) => `<span><i class="dot" style="background:${c}"></i>${esc(l)}</span>`).join('')}</div>`;
+
+/* tooltip */
+const tipEl = document.createElement('div'); tipEl.id = 'tip'; tipEl.setAttribute('role', 'tooltip');
+function showTip(t, x, y) {
+  tipEl.innerHTML = t; tipEl.classList.add('on');
+  const r = tipEl.getBoundingClientRect();
+  let left = x + 14, top = y - r.height - 12;
+  if (left + r.width > innerWidth - 8) left = x - r.width - 14;
+  if (top < 8) top = y + 18;
+  tipEl.style.left = Math.max(8, left) + 'px'; tipEl.style.top = top + 'px';
+}
+document.addEventListener('pointermove', (e) => { const t = e.target.closest && e.target.closest('[data-tip]'); if (t) showTip(t.getAttribute('data-tip'), e.clientX, e.clientY); else tipEl.classList.remove('on'); }, { passive: true });
+document.addEventListener('scroll', () => tipEl.classList.remove('on'), { passive: true, capture: true });
+
+/* ============ toast / modal ============ */
+let toastT;
+function toast(msg, undo) {
+  $$('.toast').forEach((t) => t.remove());
+  const t = document.createElement('div'); t.className = 'toast' + (undo ? '' : ' plain'); t.setAttribute('role', 'status');
+  t.innerHTML = `<span>${msg}</span>` + (undo ? '<button type="button">Urungkan</button>' : '');
+  document.body.appendChild(t);
+  if (undo) t.querySelector('button').onclick = () => { undo(); t.remove(); };
+  clearTimeout(toastT); toastT = setTimeout(() => t.remove(), undo ? 6000 : 2600);
+}
+function modal(html, cls = '') {
+  const s = document.createElement('div'); s.className = 'scrim';
+  s.innerHTML = `<div class="modal ${cls}" role="dialog" aria-modal="true">${html}</div>`;
+  document.body.appendChild(s);
+  const close = () => { s.remove(); document.removeEventListener('keydown', k); };
+  const k = (e) => { if (e.key === 'Escape') close(); };
+  document.addEventListener('keydown', k);
+  s.addEventListener('click', (e) => { if (e.target === s || e.target.closest('[data-close]')) close(); });
+  setTimeout(() => { const f = s.querySelector('input,button.primary,button'); f && f.focus(); }, 30);
+  return { el: s, close };
+}
+function confirmBox(title, body, okLabel, onOk, danger) {
+  const m = modal(`<h2>${title}</h2><p>${body}</p><div class="acts"><button class="btn" data-close>Batal</button><button class="btn ${danger ? 'dark' : 'primary'}" data-ok>${okLabel}</button></div>`);
+  m.el.querySelector('[data-ok]').onclick = () => { m.close(); onOk(); };
+}
+function removeWithUndo(fn, msg = 'Baris dihapus') {
+  const snap = clone(S); fn(); save(); rerender();
+  toast(msg, () => { S = snap; save(); rerender(); });
+}
+
+/* ============ calculations (pure-ish, read S) ============ */
+function ym(y, m) { while (m < 0) { m += 12; y--; } while (m > 11) { m -= 12; y++; } return [y, m]; }
+function budMonth(y, m) {
+  [y, m] = ym(y, m);
+  const d = S.budget.data[mkey(y, m)] || {}, o = {};
+  for (const g of BUD_GROUPS) {
+    let p = null, a = null;
+    for (const r of S.budget.rows[g.k]) { const c = d[r.id]; if (c) { if (isNum(c.p)) p = (p || 0) + c.p; if (isNum(c.a)) a = (a || 0) + c.a; } }
+    o[g.k] = { p, a };
+  }
+  o.outP = sumN(o.living.p, o.debt.p, o.future.p); o.outA = sumN(o.living.a, o.debt.a, o.future.a);
+  o.inP = o.income.p; o.inA = o.income.a;
+  o.netP = o.inP == null && o.outP == null ? null : (o.inP || 0) - (o.outP || 0);
+  o.netA = o.inA == null && o.outA == null ? null : (o.inA || 0) - (o.outA || 0);
+  o.hasA = o.inA != null || o.outA != null; o.hasP = o.inP != null || o.outP != null;
+  return o;
+}
+const budYear = (y) => MON.map((_, m) => budMonth(y, m));
+function latestBud(y) { const ys = budYear(y); for (let m = 11; m >= 0; m--) if (isNum(ys[m].inA) && ys[m].inA > 0) return { m, d: ys[m] }; return null; }
+function avgSpend(y, onlyLiving) {
+  const ys = budYear(y).filter((d) => isNum(d.living.a) || isNum(d.debt.a));
+  if (!ys.length) return null;
+  return ys.reduce((s, d) => s + (d.living.a || 0) + (onlyLiving ? 0 : (d.debt.a || 0)), 0) / ys.length;
+}
+function worthMonth(y, m) {
+  [y, m] = ym(y, m);
+  const d = S.worth.data[mkey(y, m)] || {}, o = {};
+  for (const g of W_GROUPS) { let s = null; for (const r of S.worth.rows[g.k]) { const v = d[r.id]; if (isNum(v)) s = (s || 0) + v; } o[g.k] = s; }
+  o.assets = sumN(o.cash, o.invest, o.fixed, o.other);
+  o.nw = o.assets == null && o.liab == null ? null : (o.assets || 0) - (o.liab || 0);
+  return o;
+}
+function latestWorth(y) { for (let m = 11; m >= 0; m--) { const w = worthMonth(y, m); if (w.nw != null) return { m, w }; } return null; }
+function worthRowLatest(re, group = 'cash') {
+  const r = S.worth.rows[group].find((x) => re.test(x.name)); if (!r) return null;
+  for (let y = S.year; y >= S.year - 1; y--) for (let m = 11; m >= 0; m--) { const v = (S.worth.data[mkey(y, m)] || {})[r.id]; if (isNum(v)) return { v, y, m }; }
+  return null;
+}
+function budRowPlanLatest(re, group = 'future') {
+  const r = S.budget.rows[group].find((x) => re.test(x.name)); if (!r) return null;
+  for (let m = 11; m >= 0; m--) { const c = (S.budget.data[mkey(S.year, m)] || {})[r.id]; if (c && isNum(c.p)) return { v: c.p, m }; }
+  return null;
+}
+
+function emCalc() {
+  const e = S.emergency;
+  const target = isNum(e.monthly) && isNum(e.months) ? e.monthly * e.months : null;
+  const gap = target != null ? Math.max(target - (e.current || 0), 0) : null;
+  const months = gap != null && gap > 0 && isNum(e.saving) && e.saving > 0 ? gap / e.saving : gap === 0 ? 0 : null;
+  const cover = isNum(e.monthly) && e.monthly > 0 && isNum(e.current) ? e.current / e.monthly : null;
+  return { target, gap, months, cover, frac: target ? (e.current || 0) / target : 0 };
+}
+
+function pmt(rate, n, pv) { return rate === 0 ? pv / n : pv * rate / (1 - Math.pow(1 + rate, -n)); }
+function kprCalc() {
+  const k = S.kpr;
+  if (!isNum(k.price) || !isNum(k.years) || k.years <= 0 || !isNum(k.rateFix)) return null;
+  const P = k.price * (1 - (k.dp || 0)), N = Math.round(k.years * 12);
+  const Nf = clamp(Math.round((isNum(k.fixYears) ? k.fixYears : k.years) * 12), 0, N), Nfl = N - Nf;
+  const rf = k.rateFix / 12, rfl = (k.rateFloat || 0) / 12;
+  let start = null; if (/^\d{4}-\d{2}$/.test(k.start || '')) { const [a, b] = k.start.split('-').map(Number); start = [a, b - 1]; }
+  const sched = []; let bal = P;
+  const payF = Nf > 0 ? pmt(rf, N, P) : 0;
+  for (let i = 1; i <= Nf; i++) { const int = bal * rf, pr = payF - int, open = bal; bal -= pr; sched.push({ i, open, pr, int, pay: payF, bal }); }
+  const balAtFloat = bal; let payFl = 0;
+  if (Nfl > 0) { payFl = pmt(rfl, Nfl, balAtFloat); for (let j = 1; j <= Nfl; j++) { const int = bal * rfl, pr = payFl - int, open = bal; bal -= pr; sched.push({ i: Nf + j, open, pr, int, pay: payFl, bal, fl: true }); } }
+  sched.forEach((r) => { if (start) { const [yy, mm] = ym(start[0], start[1] + r.i - 1); r.y = yy; r.m = mm; } else { r.y = Math.ceil(r.i / 12); r.m = (r.i - 1) % 12; } });
+  const pays = sched.map((r) => r.pay), minPay = Math.min(...pays), maxPay = Math.max(...pays);
+  const interest = sched.reduce((a, r) => a + r.int, 0);
+  const net = isNum(k.income) ? k.income - (k.other || 0) : null;
+  const rMin = net > 0 ? minPay / net : null, rMax = net > 0 ? maxPay / net : null;
+  const dp = k.price * (k.dp || 0);
+  const c = {};
+  c.bphtb = Math.max(k.price - (k.npoptkp || 0), 0) * (k.bphtb || 0);
+  c.ppn = k.newHome ? k.price * 0.11 * (1 - (k.ppnDisc || 0)) : 0;
+  c.ajb = k.price * (k.ajb || 0);
+  c.bbn = k.price * (k.bbn || 0);
+  c.notary = k.notary || 0;
+  c.booking = k.booking || 0;
+  c.provisi = P * (k.provisi || 0);
+  c.appraisal = k.appraisal || 0;
+  c.bankOther = k.bankOther || 0;
+  const other = Object.values(c).reduce((a, b) => a + b, 0);
+  let end = null; if (start) { const [yy, mm] = ym(start[0], start[1] + N); end = MONTHS[mm] + ' ' + yy; }
+  return { P, N, Nf, Nfl, payF, payFl, balAtFloat, sched, minPay, maxPay, interest, rMin, rMax, dp, c, other, total: dp + P + interest + other, end, start };
+}
+function kprVerdict(a, b) {
+  if (!isNum(a)) return null;
+  if (a < .3) return b < .3 ? ['ok', 'Sehat', 'Cicilan terendah dan tertinggi sama-sama di bawah 30% penghasilan. Masih ada ruang lega untuk biaya hidup, dana darurat, dan investasi.']
+    : ['mid', 'Sehat di awal, waspada saat bunga floating', 'Selama bunga fix cicilan masih ringan, tapi setelah masuk floating porsinya naik. Siapkan cadangan dari sekarang supaya kenaikan cicilan tidak mengganggu arus kas.'];
+  if (a <= .4) return b <= .4 ? ['mid', 'Masih aman, perlu disiplin', 'Cicilan memakan 30 sampai 40% penghasilan. Tetap bisa jalan asal arus kas dijaga ketat dan dana darurat diprioritaskan.']
+    : ['bad', 'Aman di awal, berat saat floating', 'Masa bunga fix masih tertangani, tapi saat floating cicilan lewat 40% penghasilan. Pertimbangkan DP lebih besar, tenor lebih panjang, atau menambah penghasilan sebelum masa floating.'];
+  if (a <= .5) return ['bad', 'Mulai membebani', 'Cicilan memakan 40 sampai 50% penghasilan, jadi sulit menabung dan berinvestasi. Coba naikkan DP, perpanjang tenor, atau pilih properti yang lebih murah.'];
+  return ['bad', 'Tidak sehat', 'Cicilan melewati separuh penghasilan. Risiko gagal bayar dan terjerat utang lain tinggi. Sebaiknya hitung ulang harga properti, DP, atau tenornya.'];
+}
+
+function goalCalc(g) {
+  const gap = isNum(g.target) ? Math.max(g.target - (g.current || 0), 0) : null;
+  const plain = gap != null && gap > 0 && g.saving > 0 ? gap / g.saving : gap === 0 ? 0 : null;
+  let inv = null; const series = [], flat = [];
+  if (isNum(g.target) && (g.saving > 0 || (g.rate > 0 && g.current > 0))) {
+    let b = g.current || 0, f = g.current || 0, n = 0; series.push(b); flat.push(f);
+    if (b >= g.target) inv = 0;
+    else while (n < 1200) { n++; b = b + b * (g.rate || 0) / 12 + (g.saving || 0); f += g.saving || 0; series.push(b); flat.push(f); if (b >= g.target) { inv = n; break; } }
+  }
+  return { gap, plain, inv, series, flat };
+}
+
+const INV_CATS = [
+  { k: 'rd', name: 'Reksa dana', color: 'var(--c-future)' },
+  { k: 'idx', name: 'Saham Indonesia', color: 'var(--c-living)' },
+  { k: 'us', name: 'Saham US', color: 'var(--c-plum)' },
+  { k: 'crypto', name: 'Kripto', color: 'var(--c-gold)' },
+  { k: 'other', name: 'Lainnya', color: 'var(--c-debt)' },
+];
+function invRow(cat, r) {
+  const fx = S.invest.usdidr;
+  const o = { mv: null, cost: null, pl: null, pct: null, mvUsd: null, plUsd: null };
+  if (cat === 'rd' || cat === 'other') { o.mv = isNum(r.now) ? r.now : null; o.cost = isNum(r.buy) ? r.buy : null; }
+  else if (cat === 'idx') { if (isNum(r.lots) && isNum(r.price)) o.mv = r.lots * 100 * r.price; if (isNum(r.lots) && isNum(r.avg)) o.cost = r.lots * 100 * r.avg; }
+  else if (cat === 'us') {
+    if (isNum(r.qty) && isNum(r.price)) o.mvUsd = r.qty * r.price;
+    if (isNum(r.qty) && isNum(r.avg)) o.costUsd = r.qty * r.avg;
+    if (o.mvUsd != null && o.costUsd != null) o.plUsd = o.mvUsd - o.costUsd;
+    if (isNum(fx)) { if (o.mvUsd != null) o.mv = o.mvUsd * fx; if (o.costUsd != null) o.cost = o.costUsd * fx; }
+  } else if (cat === 'crypto') {
+    if (isNum(r.qty) && isNum(r.price)) o.mvUsd = r.qty * r.price;
+    if (isNum(fx) && o.mvUsd != null) o.mv = o.mvUsd * fx;
+    o.cost = isNum(r.cost) ? r.cost : null;
+  }
+  if (o.mv != null && o.cost != null) { o.pl = o.mv - o.cost; o.pct = o.cost ? o.pl / o.cost : null; }
+  return o;
+}
+function invTotals() {
+  const out = { mv: 0, cost: 0, pl: 0, plBase: 0, cats: {}, missingFx: false, any: false };
+  for (const c of INV_CATS) {
+    let mv = 0, cost = 0, pl = 0, base = 0, n = 0;
+    for (const r of S.invest[c.k]) {
+      const o = invRow(c.k, r); n++;
+      if ((c.k === 'us' || c.k === 'crypto') && o.mvUsd != null && o.mv == null) out.missingFx = true;
+      if (o.mv != null) mv += o.mv;
+      if (o.pl != null) { pl += o.pl; base += o.cost; }
+      if (o.cost != null) cost += o.cost;
+    }
+    out.cats[c.k] = { mv, cost, pl, base, n };
+    out.mv += mv; out.cost += cost; out.pl += pl; out.plBase += base;
+    if (n) out.any = true;
+  }
+  return out;
+}
+
+function retireCalc() {
+  const r = S.retire;
+  const years = isNum(r.age) && isNum(r.retireAge) ? r.retireAge - r.age : null;
+  if (years == null || years < 0) return { years };
+  const n = years * 12, i = (r.ret || 0) / 12, wr = r.wr || 0.04;
+  const mAt = isNum(r.monthly) ? r.monthly * Math.pow(1 + (r.inflation || 0), years) : null;
+  const need = mAt != null ? mAt * 12 / wr : null;
+  let b = r.current || 0; const path = [b];
+  for (let k = 1; k <= n; k++) { b = b + b * i + (r.saving || 0); if (k % 12 === 0) path.push(b); }
+  const fv = b, diff = need != null ? fv - need : null;
+  let req = null;
+  if (need != null && n > 0) {
+    const g = Math.pow(1 + i, n), pvF = (r.current || 0) * g, rem = need - pvF;
+    req = rem <= 0 ? 0 : i === 0 ? rem / n : rem * i / (g - 1);
+  }
+  return { years, n, mAt, yAt: mAt != null ? mAt * 12 : null, need, fv, diff, req, path };
+}
+
+function pyrStats() {
+  const lv = S.pyramid.map((l, i) => { const t = l.items.length, d = l.items.filter((x) => x.done).length; return { i, t, d, f: t ? d / t : 0 }; });
+  const all = lv.reduce((a, b) => a + b.t, 0), done = lv.reduce((a, b) => a + b.d, 0);
+  let cur = lv.findIndex((l) => l.f < 1); if (cur < 0) cur = lv.length - 1;
+  return { lv, all, done, cur, f: all ? done / all : 0 };
+}
+
+/* ============ views ============ */
+const V = {};
+const monthChips = (sel, hasFn) => `<div class="chips" role="group" aria-label="Pilih bulan">${MON.map((m, i) => `<button type="button" class="chip ${hasFn(i) ? 'has' : ''}" data-month="${i}" aria-pressed="${i === sel}"><i></i>${m}</button>`).join('')}</div>`;
+const emptyBox = (title, body, acts = '') => `<div class="empty"><h3>${title}</h3><p>${body}</p><div class="row" style="justify-content:center">${acts}</div></div>`;
+const go = (id, label, cls = 'btn') => `<a class="${cls}" href="#/${id}">${label}</a>`;
+
+/* ---------------- Ringkasan ---------------- */
+V.ringkasan = {
+  title: 'Ringkasan', icon: 'home', yearAware: true, group: 0,
+  html() {
+    const y = S.year;
+    const any = budYear(y).some((d) => d.hasA || d.hasP) || MON.some((_, m) => worthMonth(y, m).nw != null);
+    const hi = `<p class="lede">${S.name ? `Halo, ${esc(S.name)}. ` : ''}Semua angka di sini dirangkum otomatis dari Arus Kas, Kekayaan, dan Dana Darurat tahun ${y}.</p>`;
+    if (!any) return hi + emptyBox(`Belum ada catatan di ${y}`, 'Mulai dari Arus Kas bulan ini. Begitu ada angka pemasukan dan pengeluaran, ringkasan, rasio kesehatan, dan grafiknya terisi sendiri.', go('arus-kas', 'Isi Arus Kas', 'btn primary') + go('kekayaan', 'Catat kekayaan') + (S.demo ? '' : '<button class="btn ghost" data-demo>Lihat dengan data contoh</button>'));
+    return hi + `
+      <section class="panel vault">${rosette()}<div class="grid g4" data-k="hero"></div></section>
+      <div class="grid split mt">
+        <section class="panel"><div class="panel-h"><div><h2>Cek kesehatan keuangan</h2><p class="sub" data-k="chkSub"></p></div></div><div data-k="check"></div></section>
+        <section class="panel"><div class="panel-h"><div><h2>Arus kas ${y}</h2><p class="sub">Uang masuk dan keluar yang sebenarnya, per bulan.</p></div></div><div class="chart" data-k="cf"></div>${legend([['var(--c-income)', 'Uang masuk'], ['var(--c-debt)', 'Uang keluar']])}</section>
+      </div>
+      <div class="grid g2 mt">
+        <section class="panel"><h2>Ke mana uang keluar</h2><p class="sub">Komposisi pengeluaran sebenarnya tiap bulan.</p><div class="chart" data-k="bd"></div>${legend([['var(--c-living)', 'Biaya hidup'], ['var(--c-debt)', 'Kewajiban'], ['var(--c-future)', 'Masa depan']])}</section>
+        <section class="panel"><h2>Kekayaan bersih</h2><p class="sub">Total aset dikurangi total utang, dari bulan ke bulan.</p><div class="chart" data-k="nw"></div>${legend([['var(--c-gold)', 'Kekayaan bersih'], ['var(--c-future)', 'Total aset'], ['var(--c-debt)', 'Total kewajiban']])}</section>
+      </div>
+      <h2 class="sec-h mt-l" style="margin-bottom:12px">Rekap bulanan</h2><div class="tbl-wrap" data-k="tbl"></div>`;
+  },
+  calc() {
+    const y = S.year, by = budYear(y), lb = latestBud(y), lw = latestWorth(y), em = emCalc(), ps = pyrStats();
+    const o = {};
+    let h = '';
+    if (lw) {
+      const prev = worthMonth(y, lw.m - 1).nw, ch = isNum(prev) && prev !== 0 ? (lw.w.nw - prev) / Math.abs(prev) : null;
+      h += `<div class="metric"><div class="lbl">Kekayaan bersih</div><div class="val">${rpc(lw.w.nw)}</div><div class="foot">Per ${MONTHS[lw.m]}${ch != null ? `, <span class="${tone(ch)}">${ch >= 0 ? 'naik' : 'turun'} ${pctf(Math.abs(ch))}</span> dari bulan sebelumnya` : ''}</div></div>`;
+    } else h += `<div class="metric"><div class="lbl">Kekayaan bersih</div><div class="val">–</div><div class="foot"><a href="#/kekayaan" style="color:var(--gold)">Catat aset dan utang</a></div></div>`;
+    if (lb) h += `<div class="metric"><div class="lbl">Sisa uang ${MONTHS[lb.m]}</div><div class="val ${tone(lb.d.netA)}">${rpc(lb.d.netA)}</div><div class="foot">${pctf(lb.d.netA / lb.d.inA)} dari uang masuk ${rpc(lb.d.inA)}</div></div>`;
+    else h += `<div class="metric"><div class="lbl">Sisa uang bulan ini</div><div class="val">–</div><div class="foot">Isi uang masuk yang sebenarnya</div></div>`;
+    h += `<div class="metric"><div class="lbl">Dana darurat</div><div class="val">${em.cover != null ? nfd(1).format(em.cover) + ' <small style="font-size:.5em;font-weight:500">bulan</small>' : '–'}</div><div class="foot">${em.target ? `Target ${S.emergency.months} bulan` : '<a href="#/dana-darurat" style="color:var(--gold)">Hitung targetnya</a>'}</div>${em.target ? `<div class="bar" style="margin-top:8px"><i style="width:${clamp(em.frac, 0, 1) * 100}%"></i></div>` : ''}</div>`;
+    h += `<div class="metric"><div class="lbl">Piramida keuangan</div><div class="val">Level ${ps.cur + 1}</div><div class="foot">${PYR[ps.cur].t}</div><div class="bar" style="margin-top:8px"><i style="width:${ps.f * 100}%"></i></div></div>`;
+    o.hero = h;
+
+    const lwv = lw ? lw.w : null, d = lb ? lb.d : null;
+    o.chkSub = d ? `Berdasarkan angka sebenarnya bulan ${MONTHS[lb.m]} ${y}.` : 'Isi pemasukan dan pengeluaran sebenarnya untuk melihat rasionya.';
+    const checks = [
+      { n: 'Kewajiban terhadap pendapatan', p: 'Cicilan dan tagihan dibagi uang masuk', v: d ? (d.debt.a || 0) / d.inA : null, max: .6, zone: [0, .3], target: 'di bawah 30%', st: (v) => v < .3 ? 'ok' : v <= .4 ? 'mid' : 'bad' },
+      { n: 'Investasi terhadap pendapatan', p: 'Investasi dan tabungan dibagi uang masuk', v: d ? (d.future.a || 0) / d.inA : null, max: .4, zone: [.1, .2], target: '10 sampai 20%', st: (v) => v >= .1 ? 'ok' : v >= .05 ? 'mid' : 'bad' },
+      { n: 'Biaya hidup terhadap pendapatan', p: 'Kebutuhan sehari-hari dibagi uang masuk', v: d ? (d.living.a || 0) / d.inA : null, max: 1, zone: [0, .6], target: 'di bawah 60%', st: (v) => v < .6 ? 'ok' : v <= .75 ? 'mid' : 'bad' },
+      { n: 'Kemampuan melunasi utang', p: 'Total aset dibagi total kewajiban', v: lwv && lwv.assets != null ? (lwv.liab ? lwv.assets / lwv.liab : Infinity) : null, max: 3, zone: [1, 3], target: 'di atas 100%', st: (v) => v > 1 ? 'ok' : 'bad' },
+    ];
+    const lab = { ok: 'Sehat', mid: 'Perlu perhatian', bad: 'Belum sehat' };
+    o.check = checks.map((c) => {
+      const has = isNum(c.v) || c.v === Infinity, st = has ? c.st(c.v) : null;
+      const shown = c.v === Infinity ? 'Bebas utang' : has ? (c.v >= 10 ? nfd(1).format(c.v) + '×' : pctf(c.v, 0)) : '–';
+      const pin = has ? clamp((c.v === Infinity ? c.max : c.v) / c.max, 0, 1) * 100 : 0;
+      return `<div class="check"><div><h4>${c.n}</h4><p>${c.p}</p></div><div class="v">${shown}<div style="margin-top:6px">${st ? `<span class="badge ${st}">${lab[st]}</span>` : ''}</div></div>
+        <div class="meter"><div class="zone" style="left:${c.zone[0] / c.max * 100}%;width:${(Math.min(c.zone[1], c.max) - c.zone[0]) / c.max * 100}%"></div>${has ? `<div class="pin" style="left:${pin}%"></div>` : ''}</div>
+        <div class="meta"><span>0%</span><span>Patokan: ${c.target}</span><span>${pctf(c.max, 0)}${c.max === 3 ? '+' : ''}</span></div></div>`;
+    }).join('');
+    o.cf = (w) => barChart({ w, labels: MON, series: [{ name: 'Uang masuk', color: 'var(--c-income)', values: by.map((x) => x.inA) }, { name: 'Uang keluar', color: 'var(--c-debt)', values: by.map((x) => x.outA) }] });
+    o.bd = (w) => barChart({ w, stacked: true, labels: MON, series: [{ name: 'Biaya hidup', color: 'var(--c-living)', values: by.map((x) => x.living.a) }, { name: 'Kewajiban', color: 'var(--c-debt)', values: by.map((x) => x.debt.a) }, { name: 'Masa depan', color: 'var(--c-future)', values: by.map((x) => x.future.a) }] });
+    const ws = MON.map((_, m) => worthMonth(y, m));
+    o.nw = (w) => lineChart({ w, labels: MON, zero: false, series: [{ name: 'Total aset', color: 'var(--c-future)', values: ws.map((x) => x.assets), width: 1.6, dash: '4 4' }, { name: 'Total kewajiban', color: 'var(--c-debt)', values: ws.map((x) => x.liab), width: 1.6, dash: '4 4' }, { name: 'Kekayaan bersih', color: 'var(--c-gold)', values: ws.map((x) => x.nw), area: true, dots: true, width: 2.6 }] });
+    let rows = '', tot = { inP: null, outP: null, inA: null, outA: null, net: null };
+    by.forEach((b, m) => {
+      const w = ws[m], prev = m ? ws[m - 1].nw : worthMonth(y, -1).nw;
+      const ch = isNum(w.nw) && isNum(prev) && prev !== 0 ? (w.nw - prev) / Math.abs(prev) : null;
+      if (!b.hasA && !b.hasP && w.nw == null) return;
+      tot.inP = sumN(tot.inP, b.inP); tot.outP = sumN(tot.outP, b.outP); tot.inA = sumN(tot.inA, b.inA); tot.outA = sumN(tot.outA, b.outA); tot.net = sumN(tot.net, b.netA);
+      rows += `<tr><td>${MONTHS[m]}</td><td>${rp(b.inP)}</td><td>${rp(b.outP)}</td><td>${rp(b.inA)}</td><td>${rp(b.outA)}</td><td class="${tone(b.netA)}">${rp(b.netA)}</td><td>${rp(w.nw)}</td><td class="${tone(ch)}">${pctf(ch, 1, true)}</td></tr>`;
+    });
+    o.tbl = `<table class="tbl"><thead><tr><th>Bulan</th><th>Masuk (rencana)</th><th>Keluar (rencana)</th><th>Masuk</th><th>Keluar</th><th>Sisa</th><th>Kekayaan bersih</th><th>Perubahan</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td>Total ${y}</td><td>${rp(tot.inP)}</td><td>${rp(tot.outP)}</td><td>${rp(tot.inA)}</td><td>${rp(tot.outA)}</td><td class="${tone(tot.net)}">${rp(tot.net)}</td><td></td><td></td></tr></tfoot></table>`;
+    return o;
+  },
+};
+
+/* ---------------- Piramida ---------------- */
+V.piramida = {
+  title: 'Piramida keuangan', icon: 'pyr', group: 0,
+  html() {
+    const ps = pyrStats(); if (S.ui.lvl == null) S.ui.lvl = ps.cur;
+    const L = S.pyramid[S.ui.lvl], meta = PYR[S.ui.lvl];
+    return `<p class="lede">Urutan prioritas membangun keuangan pribadi. Kuatkan fondasi di bawah dulu sebelum naik ke level berikutnya. Centang yang sudah tercapai, ubah atau tambah poinnya sesuai kondisimu.</p>
+    <div class="grid split">
+      <section class="panel"><div class="pyr" data-k="pyr"></div><div class="row mt small muted" data-k="pyrAll"></div></section>
+      <section class="panel">
+        <div class="panel-h"><div><p class="sub" style="margin:0 0 2px">Level ${S.ui.lvl + 1} dari 7</p><h2>${meta.t}</h2><p class="sub">${meta.d}</p></div><span data-k="lvlBadge"></span></div>
+        <div data-k="insight"></div>
+        <div>${L.items.map((it) => `<div class="lvl-item"><input type="checkbox" data-b="pyramid.${L.id}.items.${it.id}.done" data-kind="bool" ${it.done ? 'checked' : ''} aria-label="Tandai tercapai"><textarea class="t" rows="1" data-b="pyramid.${L.id}.items.${it.id}.text" data-kind="text" aria-label="Poin pencapaian">${esc(it.text)}</textarea><button class="x btn ghost sm" data-delitem="${it.id}" aria-label="Hapus poin">${ic('x')}</button></div>`).join('')}</div>
+        <div class="row mt"><button class="btn sm" data-additem>${ic('plus')}Tambah poin</button><span class="spacer"></span>${go(meta.link, 'Buka modul terkait', 'btn ghost sm')}</div>
+      </section>
+    </div>`;
+  },
+  calc() {
+    const ps = pyrStats(), o = {};
+    const cols = ['#1F5E46', '#2B7A5C', '#3A76A6', '#5B5FA8', '#7A4FA0', '#A2457E', '#BE3B63'];
+    o.pyr = ps.lv.map((l, i) => `<button type="button" data-lvl="${i}" aria-pressed="${i === S.ui.lvl}" style="width:${100 - i * 10.5}%;background:${cols[i]}" aria-label="Level ${i + 1}: ${PYR[i].t}"><i class="fill" style="transform:scaleX(${l.f})"></i><span>${i + 1}. ${PYR[i].s}</span><span class="tnum">${l.f === 1 ? ic('check').replace('<svg ', '<svg style="width:16px;height:16px;vertical-align:-3px;color:var(--gold)" ') : l.d + '/' + l.t}</span></button>`).join('');
+    o.pyrAll = `${ps.done} dari ${ps.all} poin tercapai. Kamu sedang membangun level ${ps.cur + 1}.`;
+    const l = ps.lv[S.ui.lvl]; o.lvlBadge = l.t ? `<span class="badge ${l.f === 1 ? 'ok' : l.f > 0 ? 'mid' : ''}">${l.f === 1 ? 'Tuntas' : pctf(l.f, 0)}</span>` : '';
+    const y = S.year, by = budYear(y), i = S.ui.lvl; let ins = '';
+    if (i <= 1) { const rec = by.filter((b) => isNum(b.inA)); const pos = rec.filter((b) => b.netA > 0).length; if (rec.length) ins = i === 0 ? `Tercatat ${rec.length} bulan dengan uang masuk di ${y}.` : `${pos} dari ${rec.length} bulan tercatat di ${y} punya sisa uang positif.`; }
+    if (i === 2) { const e = emCalc(); if (e.cover != null) ins = `Dana daruratmu sekarang setara ${nfd(1).format(e.cover)} bulan pengeluaran.`; }
+    if (i === 4) ins = S.goals.length ? `Ada ${S.goals.length} tujuan keuangan tercatat.` : '';
+    if (i === 5) { const t = invTotals(); if (t.mv) ins = `Nilai portofolio investasimu ${rp(t.mv)}.`; }
+    o.insight = ins ? `<div class="callout" style="margin-bottom:10px">${ins}</div>` : '';
+    return o;
+  },
+  bind(root) {
+    root.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-lvl]'); if (b) { S.ui.lvl = +b.dataset.lvl; save(); rerender(); return; }
+      const L = S.pyramid[S.ui.lvl];
+      if (e.target.closest('[data-additem]')) { L.items.push({ id: uid(), text: '', done: false }); save(); rerender(); setTimeout(() => { const ins = $$('.lvl-item .t', document); ins.at(-1)?.focus(); }, 20); }
+      const d = e.target.closest('[data-delitem]'); if (d) removeWithUndo(() => { L.items = L.items.filter((x) => x.id !== d.dataset.delitem); }, 'Poin dihapus');
+    });
+  },
+};
+
+/* ---------------- Arus Kas ---------------- */
+V['arus-kas'] = {
+  title: 'Arus kas', icon: 'flow', yearAware: true, group: 1,
+  html() {
+    const y = S.year, m = S.ui.bMonth, k = mkey(y, m), pm = ym(y, m - 1);
+    const has = (i) => { const d = S.budget.data[mkey(y, i)]; return d && Object.values(d).some((c) => isNum(c.p) || isNum(c.a)); };
+    return `<p class="lede">Tulis rencana di awal bulan, lalu isi angka sebenarnya. Selisihnya langsung kelihatan: hijau berarti lebih hemat atau pemasukan lebih besar dari rencana.</p>
+    ${monthChips(m, has)}
+    <div class="row" style="margin-bottom:14px"><h2 class="sec-h" style="margin:0">${MONTHS[m]} ${y}</h2><span class="spacer"></span><button class="btn sm" data-copyplan>${ic('copy')}Salin rencana ${MON[pm[1]]}${pm[0] !== y ? ' ' + pm[0] : ''}</button></div>
+    <div class="grid g3" data-k="sum"></div>
+    <section class="panel mt" data-k="alloc"></section>
+    <div class="mt">${BUD_GROUPS.map((g) => `
+      <div class="lg-group">
+        <div class="lg-head"><div class="lg-title"><h3><i class="dot" style="background:${g.color}"></i>${g.name}</h3><small>${g.sub}</small></div><div class="t p" data-k="gp-${g.k}"></div><div class="t a" data-k="ga-${g.k}"></div><div class="t d" data-k="gd-${g.k}"></div><div class="sp"></div></div>
+        ${S.budget.rows[g.k].map((r) => `<div class="lg-row"><div class="name"><input data-b="budget.rows.${g.k}.${r.id}.name" data-kind="text" value="${esc(r.name)}" placeholder="Nama pos" aria-label="Nama pos"></div><div class="p" data-l="Rencana">${money(`budget.data.${k}.${r.id}.p`, { bare: true, ph: '', label: 'Rencana ' + r.name })}</div><div class="a" data-l="Sebenarnya">${money(`budget.data.${k}.${r.id}.a`, { bare: true, ph: '', label: 'Sebenarnya ' + r.name })}</div><div class="diff" data-k="d-${r.id}"></div><button class="x" data-del="${g.k}:${r.id}" aria-label="Hapus ${esc(r.name)}">${ic('x')}</button></div>`).join('')}
+        <div class="lg-add"><button class="btn ghost sm" data-add="${g.k}">${ic('plus')}Tambah pos</button></div>
+      </div>`).join('')}</div>`;
+  },
+  calc() {
+    const y = S.year, m = S.ui.bMonth, b = budMonth(y, m), d = S.budget.data[mkey(y, m)] || {}, o = {};
+    const vs = (a, p, inflow) => isNum(a) && isNum(p) ? `<span class="${tone(inflow ? a - p : p - a)}">${inflow ? (a - p >= 0 ? 'Lebih ' : 'Kurang ') : (p - a >= 0 ? 'Hemat ' : 'Lebih boros ')}${rp(Math.abs(a - p))}</span> dari rencana` : isNum(p) ? `Rencana ${rp(p)}` : 'Belum ada rencana';
+    o.sum = `<div class="panel metric"><div class="lbl"><i class="dot" style="background:var(--c-income)"></i>Uang masuk</div><div class="val">${rp(b.inA)}</div><div class="foot">${vs(b.inA, b.inP, true)}</div></div>
+      <div class="panel metric"><div class="lbl"><i class="dot" style="background:var(--c-debt)"></i>Uang keluar</div><div class="val">${rp(b.outA)}</div><div class="foot">${vs(b.outA, b.outP)}</div></div>
+      <div class="panel metric vault">${rosette()}<div class="lbl">Sisa uang</div><div class="val ${tone(b.netA)}">${rp(b.netA)}</div><div class="foot">${isNum(b.netP) ? `Rencana sisa ${rp(b.netP)}` : 'Uang masuk dikurangi uang keluar'}</div></div>`;
+    const useA = b.hasA, base = useA ? b.inA : b.inP;
+    const parts = [['Biaya hidup', 'var(--c-living)', useA ? b.living.a : b.living.p], ['Kewajiban', 'var(--c-debt)', useA ? b.debt.a : b.debt.p], ['Masa depan', 'var(--c-future)', useA ? b.future.a : b.future.p]];
+    const outs = parts.reduce((a, p) => a + (p[2] || 0), 0), left = (base || 0) - outs, denom = Math.max(base || 0, outs);
+    if (denom > 0) {
+      const segs = [...parts, ['Sisa', 'var(--line-2)', left > 0 ? left : 0]];
+      o.alloc = `<div class="panel-h" style="margin-bottom:10px"><div><h2>Pembagian uang ${useA ? 'sebenarnya' : 'yang direncanakan'}</h2><p class="sub">Dibandingkan dengan total uang masuk ${rp(base)}.</p></div>${left < 0 ? `<span class="badge bad">Defisit ${rp(-left)}</span>` : ''}</div>
+      <div style="display:flex;height:16px;border-radius:99px;overflow:hidden;background:var(--sunken);gap:2px">${segs.map((s) => s[2] > 0 ? `<i data-tip="<b>${s[0]}</b>${tipRow(s[1], pctf(s[2] / denom), rp(s[2]))}" style="flex:${s[2]};background:${s[1]}"></i>` : '').join('')}</div>
+      <div class="legend">${segs.map((s) => `<span><i class="dot" style="background:${s[1]}"></i>${s[0]} <b class="tnum" style="color:var(--ink)">${base ? pctf((s[2] || 0) / base, 0) : '–'}</b></span>`).join('')}</div>`;
+    } else o.alloc = `<p class="muted small" style="margin:0">Isi uang masuk dan pengeluaran untuk melihat pembagiannya.</p>`;
+    for (const g of BUD_GROUPS) {
+      const gp = b[g.k].p, ga = b[g.k].a;
+      o['gp-' + g.k] = `<small>Rencana</small>${rp(gp)}`; o['ga-' + g.k] = `<small>Sebenarnya</small>${rp(ga)}`;
+      const df = isNum(gp) && isNum(ga) ? (g.inflow ? ga - gp : gp - ga) : null;
+      o['gd-' + g.k] = `<small>Selisih</small><span class="${tone(df)}">${isNum(df) ? rp(df, { plus: true }) : '–'}</span>`;
+      for (const r of S.budget.rows[g.k]) {
+        const c = d[r.id] || {}, df2 = isNum(c.p) && isNum(c.a) ? (g.inflow ? c.a - c.p : c.p - c.a) : null;
+        o['d-' + r.id] = isNum(df2) ? (Math.round(df2) === 0 ? '<span class="muted">Sesuai</span>' : `<span class="${tone(df2)}">${rp(df2, { plus: true })}</span>`) : '';
+      }
+    }
+    return o;
+  },
+  bind(root) {
+    root.addEventListener('click', (e) => {
+      const mb = e.target.closest('[data-month]'); if (mb) { S.ui.bMonth = +mb.dataset.month; save(); rerender(); return; }
+      const ad = e.target.closest('[data-add]'); if (ad) { S.budget.rows[ad.dataset.add].push({ id: uid(), name: '' }); save(); rerender(); setTimeout(() => { const ins = $$(`[data-b^="budget.rows.${ad.dataset.add}."]`, document); ins.at(-1)?.focus(); }, 20); return; }
+      const dl = e.target.closest('[data-del]'); if (dl) { const [g, id] = dl.dataset.del.split(':'); removeWithUndo(() => { S.budget.rows[g] = S.budget.rows[g].filter((r) => r.id !== id); }, 'Pos dihapus dari semua bulan'); return; }
+      if (e.target.closest('[data-copyplan]')) {
+        const y = S.year, m = S.ui.bMonth, [py, pm] = ym(y, m - 1), src = S.budget.data[mkey(py, pm)] || {};
+        if (!Object.values(src).some((c) => isNum(c.p))) { toast(`Belum ada rencana di ${MONTHS[pm]} ${py}`); return; }
+        const snap = clone(S), k = mkey(y, m); S.budget.data[k] = S.budget.data[k] || {};
+        for (const [id, c] of Object.entries(src)) if (isNum(c.p)) { S.budget.data[k][id] = S.budget.data[k][id] || {}; S.budget.data[k][id].p = c.p; }
+        save(); rerender(); toast(`Rencana ${MONTHS[pm]} disalin`, () => { S = snap; save(); rerender(); });
+      }
+    });
+  },
+};
+
+/* ---------------- Kekayaan ---------------- */
+V.kekayaan = {
+  title: 'Kekayaan bersih', icon: 'worth', yearAware: true, group: 1,
+  html() {
+    const y = S.year, m = S.ui.wMonth, k = mkey(y, m), pm = ym(y, m - 1);
+    const has = (i) => worthMonth(y, i).nw != null;
+    return `<p class="lede">Catat nilai semua yang kamu punya dan semua utang yang belum lunas, cukup sebulan sekali. Kekayaan bersih adalah selisih keduanya, dan grafiknya menunjukkan arah perkembanganmu.</p>
+    ${monthChips(m, has)}
+    <div class="row" style="margin-bottom:14px"><h2 class="sec-h" style="margin:0">${MONTHS[m]} ${y}</h2><span class="spacer"></span><button class="btn sm" data-fillinv>${ic('sync')}Isi dari Monitor Investasi</button><button class="btn sm" data-copyprev>${ic('copy')}Salin nilai ${MON[pm[1]]}</button></div>
+    <section class="panel vault">${rosette()}<div class="grid g4" data-k="hero"></div></section>
+    <div class="grid split mt" style="align-items:start">
+      <div>${W_GROUPS.map((g) => `
+        <div class="lg-group">
+          <div class="lg-head two"><div class="lg-title"><h3><i class="dot" style="background:${g.color}"></i>${g.name}</h3><small>${g.sub}</small></div><div class="t" data-k="g-${g.k}"></div></div>
+          ${S.worth.rows[g.k].map((r) => `<div class="lg-row two"><div class="name"><input data-b="worth.rows.${g.k}.${r.id}.name" data-kind="text" value="${esc(r.name)}" placeholder="Nama aset" aria-label="Nama"></div><div class="p">${money(`worth.data.${k}.${r.id}`, { ph: '', label: r.name })}</div><div class="diff pct muted" data-k="p-${r.id}"></div><button class="x" data-del="${g.k}:${r.id}" aria-label="Hapus ${esc(r.name)}">${ic('x')}</button></div>`).join('')}
+          <div class="lg-add"><button class="btn ghost sm" data-add="${g.k}">${ic('plus')}Tambah baris</button></div>
+        </div>`).join('')}</div>
+      <div style="position:sticky;top:84px" class="stack">
+        <section class="panel"><h2>Komposisi aset</h2><p class="sub">${MONTHS[m]} ${y}</p><div class="row" style="gap:20px;align-items:center" data-k="comp"></div></section>
+        <section class="panel"><h2>Perkembangan ${y}</h2><p class="sub">Kekayaan bersih per bulan.</p><div class="chart" data-k="trend"></div></section>
+      </div>
+    </div>`;
+  },
+  calc() {
+    const y = S.year, m = S.ui.wMonth, w = worthMonth(y, m), prev = worthMonth(y, m - 1), d = S.worth.data[mkey(y, m)] || {}, o = {};
+    const ch = isNum(w.nw) && isNum(prev.nw) ? w.nw - prev.nw : null;
+    o.hero = `<div class="metric"><div class="lbl">Kekayaan bersih</div><div class="val xl">${rpc(w.nw)}</div><div class="foot">${ch != null ? `<span class="${tone(ch)}">${rp(ch, { plus: true })}</span> dibanding bulan lalu` : 'Total aset dikurangi kewajiban'}</div></div>
+      <div class="metric"><div class="lbl">Total aset</div><div class="val">${rpc(w.assets)}</div><div class="foot">${rp(w.assets)}</div></div>
+      <div class="metric"><div class="lbl">Total kewajiban</div><div class="val">${rpc(w.liab)}</div><div class="foot">${rp(w.liab)}</div></div>
+      <div class="metric"><div class="lbl">Rasio aset terhadap utang</div><div class="val">${w.liab ? (w.assets / w.liab >= 10 ? nfd(1).format(w.assets / w.liab) + '× lipat' : pctf(w.assets / w.liab, 0)) : w.assets ? 'Bebas utang' : '–'}</div><div class="foot">Patokan sehat: di atas 100%</div></div>`;
+    for (const g of W_GROUPS) {
+      o['g-' + g.k] = rp(w[g.k]);
+      for (const r of S.worth.rows[g.k]) o['p-' + r.id] = isNum(d[r.id]) && w[g.k] ? pctf(d[r.id] / w[g.k], 0) : '';
+    }
+    const items = W_GROUPS.filter((g) => !g.liab).map((g) => ({ label: g.name, value: w[g.k] || 0, color: g.color }));
+    o.comp = donut(items, { size: 150, th: 20, center: `<div><div class="small muted">Aset</div><b style="font:700 18px var(--display)">${rpc(w.assets)}</b></div>` }) + `<div class="alloc" style="flex:1;min-width:220px">${items.map((it) => `<div class="r"><i class="dot" style="background:${it.color}"></i><span>${it.label}</span><em>${w.assets ? pctf(it.value / w.assets, 0) : '–'}</em><span></span></div>`).join('')}</div>`;
+    const ws = MON.map((_, i) => worthMonth(y, i).nw);
+    o.trend = (wd) => lineChart({ w: wd, h: 200, labels: MON, zero: false, series: [{ name: 'Kekayaan bersih', color: 'var(--c-gold)', values: ws, area: true, dots: true, width: 2.6 }] });
+    return o;
+  },
+  bind(root) {
+    root.addEventListener('click', (e) => {
+      const mb = e.target.closest('[data-month]'); if (mb) { S.ui.wMonth = +mb.dataset.month; save(); rerender(); return; }
+      const ad = e.target.closest('[data-add]'); if (ad) { S.worth.rows[ad.dataset.add].push({ id: uid(), name: '' }); save(); rerender(); setTimeout(() => { $$(`[data-b^="worth.rows.${ad.dataset.add}."]`, document).at(-1)?.focus(); }, 20); return; }
+      const dl = e.target.closest('[data-del]'); if (dl) { const [g, id] = dl.dataset.del.split(':'); removeWithUndo(() => { S.worth.rows[g] = S.worth.rows[g].filter((r) => r.id !== id); }, 'Baris dihapus dari semua bulan'); return; }
+      const y = S.year, m = S.ui.wMonth, k = mkey(y, m);
+      if (e.target.closest('[data-copyprev]')) {
+        const [py, pm] = ym(y, m - 1), src = S.worth.data[mkey(py, pm)];
+        if (!src || !Object.values(src).some(isNum)) { toast(`Belum ada catatan di ${MONTHS[pm]} ${py}`); return; }
+        const snap = clone(S); S.worth.data[k] = Object.assign({}, S.worth.data[k] || {}, src); save(); rerender();
+        toast(`Nilai ${MONTHS[pm]} disalin`, () => { S = snap; save(); rerender(); });
+      }
+      if (e.target.closest('[data-fillinv]')) {
+        const t = invTotals(); if (!t.any) { toast('Monitor Investasi masih kosong'); return; }
+        const snap = clone(S), map = { rd: [/reksa/i, 'Reksa dana'], idx: [/saham indo/i, 'Saham Indonesia'], us: [/saham us|amerika/i, 'Saham US'], crypto: [/kripto|crypto/i, 'Kripto'], other: [/investasi lain/i, 'Investasi lainnya'] };
+        S.worth.data[k] = S.worth.data[k] || {};
+        for (const c of INV_CATS) {
+          const v = t.cats[c.k].mv; if (!v) continue;
+          let r = S.worth.rows.invest.find((x) => map[c.k][0].test(x.name));
+          if (!r) { r = { id: uid(), name: map[c.k][1] }; S.worth.rows.invest.push(r); }
+          S.worth.data[k][r.id] = Math.round(v);
+        }
+        save(); rerender(); toast('Nilai investasi diperbarui', () => { S = snap; save(); rerender(); });
+      }
+    });
+  },
+};
+
+/* ---------------- Dana darurat ---------------- */
+V['dana-darurat'] = {
+  title: 'Dana darurat', icon: 'shield', group: 2,
+  html() {
+    const e = S.emergency, avg = avgSpend(S.year), wr = worthRowLatest(/darurat/i), bp = budRowPlanLatest(/darurat/i);
+    const recs = [[3, 'Lajang, penghasilan tetap'], [6, 'Punya tanggungan atau cicilan'], [12, 'Penghasilan tidak tetap']];
+    return `<p class="lede">Uang cadangan untuk kejadian mendadak seperti kehilangan pekerjaan, sakit, atau perbaikan besar. Hitung targetnya dari pengeluaran wajib per bulan.</p>
+    <div class="grid split">
+      <section class="panel"><div class="form">
+        ${field('Pengeluaran wajib per bulan', money('emergency.monthly'), 'Biaya hidup ditambah kewajiban (cicilan, premi, tagihan).', 'full')}
+        ${avg ? `<div class="helper full" style="margin-top:-8px"><button type="button" data-set="emergency.monthly" data-val="${Math.round(avg)}">Pakai rata-rata Arus Kas ${S.year}: ${rp(avg)}</button></div>` : ''}
+        <div class="field full"><span>Target berapa bulan pengeluaran</span><div class="row"><div class="seg">${recs.map(([n]) => `<button type="button" data-set="emergency.months" data-val="${n}" aria-pressed="${e.months === n}">${n} bulan</button>`).join('')}</div><div style="width:120px">${decIn('emergency.months', { suf: 'bulan', d: 0 })}</div></div>
+          <small>${recs.map(([n, t]) => `${n} bulan: ${t.toLowerCase()}`).join('. ')}.</small></div>
+        ${field('Dana darurat yang sudah ada', money('emergency.current'), wr ? '' : 'Total yang sudah terkumpul sekarang.', 'full')}
+        ${wr ? `<div class="helper full" style="margin-top:-8px"><button type="button" data-set="emergency.current" data-val="${wr.v}">Ambil dari Kekayaan (${MON[wr.m]} ${wr.y}): ${rp(wr.v)}</button></div>` : ''}
+        ${field('Bisa ditabung per bulan', money('emergency.saving'), bp ? '' : 'Porsi dana darurat dari anggaran bulanan.', 'full')}
+        ${bp ? `<div class="helper full" style="margin-top:-8px"><button type="button" data-set="emergency.saving" data-val="${bp.v}">Pakai rencana Arus Kas ${MON[bp.m]}: ${rp(bp.v)}</button></div>` : ''}
+      </div></section>
+      <section class="panel vault" data-k="res"></section>
+    </div>
+    <h2 class="sec-h mt-l">Taruh di mana?</h2><p class="lede" style="margin-bottom:14px">Dana darurat harus gampang dicairkan dan nilainya tidak naik turun. Imbal hasil itu bonus, bukan tujuan.</p>
+    <div class="places">
+      ${[['Rekening tabungan biasa', 'Bisa diambil kapan saja lewat ATM atau aplikasi, nilainya tidak berubah. Bunganya kecil, jadi lama-lama kalah dengan inflasi.', 'Porsi yang harus bisa dipakai hari ini juga.'],
+        ['Bank digital dengan bunga harian', 'Tetap fleksibel, bunganya biasanya lebih tinggi dari tabungan biasa. Pastikan bank terdaftar di OJK dan dijamin LPS.', 'Sebagian besar dana darurat yang ingin tetap likuid.'],
+        ['Reksa dana pasar uang', 'Risiko rendah, imbal hasilnya umumnya di atas tabungan. Pencairan butuh satu sampai beberapa hari kerja, kecuali platform yang menyediakan pencairan instan.', 'Lapisan kedua, untuk kebutuhan yang tidak harus dicairkan hari itu.'],
+        ['Deposito tanpa ARO panjang', 'Bunga lebih tinggi dan dijamin LPS sesuai ketentuan, tapi ada jangka waktu dan penalti bila dicairkan lebih awal.', 'Bagian dana yang kecil kemungkinan dipakai dalam waktu dekat.']].map(([t, p, f]) => `<div class="place"><h4>${ic('check')}${t}</h4><p>${p}</p><div class="fit">Cocok untuk: ${f}</div></div>`).join('')}
+    </div>
+    <h2 class="sec-h mt-l" style="margin-bottom:14px">Sebaiknya jangan di sini</h2>
+    <div class="places">
+      ${[['Saham dan kripto', 'Harganya bisa turun tajam persis saat kamu butuh uangnya.'], ['Reksa dana saham atau campuran', 'Dirancang untuk tumbuh jangka panjang, bukan untuk dicairkan mendadak.'], ['Properti dan tanah', 'Butuh waktu lama untuk dijual dan biaya transaksinya besar.'], ['Asuransi unit link', 'Biayanya tinggi dan nilai tunainya tidak bisa diambil cepat.']].map(([t, p]) => `<div class="place no"><h4 class="neg">${ic('x')}${t}</h4><p>${p}</p></div>`).join('')}
+    </div>`;
+  },
+  calc() {
+    const e = S.emergency, c = emCalc(), o = {};
+    o.res = rosette() + (c.target == null ? `<div class="metric"><div class="lbl">Target dana darurat</div><div class="val xl">–</div><div class="foot">Isi pengeluaran wajib per bulan untuk menghitung target.</div></div>`
+      : `<div class="row" style="gap:22px;align-items:center;position:relative"><div class="ring">${ring(c.frac)}<div class="c"><div><b>${pctf(Math.min(c.frac, 9.99), 0)}</b><small>terkumpul</small></div></div></div>
+        <div class="metric"><div class="lbl">Target dana darurat</div><div class="val xl">${rpc(c.target)}</div><div class="foot">${rp(e.monthly)} × ${e.months} bulan</div></div></div>
+        <div class="kv mt" style="position:relative">
+          <div style="background:rgba(255,255,255,.06)"><div class="k" style="color:#9DB6A8">Masih kurang</div><div class="v">${c.gap === 0 ? 'Tercapai' : rp(c.gap)}</div></div>
+          <div style="background:rgba(255,255,255,.06)"><div class="k" style="color:#9DB6A8">Waktu sampai tercapai</div><div class="v">${c.gap === 0 ? 'Sudah aman' : c.months != null ? dur(c.months) : '–'}${c.months ? `<br><small style="color:#9DB6A8">sekitar ${addMonths(c.months)}</small>` : ''}</div></div>
+        </div>
+        ${c.gap > 0 && c.months == null ? '<p class="small" style="color:#B3C7BB;margin:14px 0 0;position:relative">Isi berapa yang bisa ditabung per bulan untuk melihat kapan target tercapai.</p>' : ''}
+        ${c.cover != null ? `<p class="small" style="color:#B3C7BB;margin:14px 0 0;position:relative">Dana yang ada sekarang cukup untuk <b style="color:#fff">${nfd(1).format(c.cover)} bulan</b> pengeluaran wajib.</p>` : ''}`);
+    return o;
+  },
+  bind(root) { root.addEventListener('click', setBtn); },
+};
+function setBtn(e) {
+  const b = e.target.closest('[data-set]'); if (!b) return;
+  const v = b.dataset.val; setAt(b.dataset.set, v === 'true' ? true : v === 'false' ? false : isNaN(+v) ? v : +v); save(); rerender();
+}
+
+/* ---------------- KPR ---------------- */
+V.kpr = {
+  title: 'Simulasi KPR', icon: 'house', group: 2,
+  html() {
+    return `<p class="lede">Hitung cicilan, total bunga, dan semua biaya di luar cicilan sebelum tanda tangan akad. Cicilan dihitung dengan metode anuitas, termasuk perubahan saat bunga fix berganti floating.</p>
+    <div class="grid split" style="align-items:start">
+      <section class="panel"><h2>Data pinjaman</h2><p class="sub">Isi sesuai penawaran bank.</p><div class="form">
+        ${field('Harga properti', money('kpr.price'), '', 'full')}
+        ${field('Uang muka (DP)', pctIn('kpr.dp'), '<span data-k="dpNom"></span>')}
+        ${field('Lama KPR', decIn('kpr.years', { suf: 'tahun', d: 0 }))}
+        ${field('Bunga fix per tahun', pctIn('kpr.rateFix'))}
+        ${field('Masa bunga fix', decIn('kpr.fixYears', { suf: 'tahun', d: 0 }))}
+        ${field('Bunga floating per tahun', pctIn('kpr.rateFloat', { ph: 'perkiraan' }), 'Perkiraan bunga setelah masa fix selesai.')}
+        ${field('Mulai cicilan', `<div class="inp"><input type="month" data-b="kpr.start" data-kind="text" value="${esc(S.kpr.start)}" aria-label="Mulai cicilan"></div>`)}
+        ${field('Penghasilan bulanan', money('kpr.income'), 'Untuk menghitung rasio cicilan.')}
+        ${field('Cicilan lain per bulan', money('kpr.other'), 'Cicilan kendaraan, paylater, dan lainnya.')}
+      </div></section>
+      <div class="stack"><section class="panel vault" data-k="res"></section><div data-k="verdict"></div></div>
+    </div>
+    <section class="panel mt"><div class="panel-h"><div><h2>Total uang yang keluar</h2><p class="sub">Dari DP sampai lunas, termasuk biaya di luar cicilan.</p></div></div><div data-k="total"></div></section>
+    <section class="panel mt"><div class="panel-h"><div><h2>Biaya lain-lain</h2><p class="sub">Pajak, notaris, dan biaya bank. Tarifnya beda tiap daerah dan bank, jadi sesuaikan dengan angka yang kamu terima.</p></div></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Komponen</th><th style="text-align:left">Dasar perhitungan</th><th>Nilai</th></tr></thead><tbody>
+        <tr><td>BPHTB<br><small class="muted">Pajak pembeli</small></td><td class="ed l"><div class="row" style="flex-wrap:nowrap"><div style="width:90px">${pctIn('kpr.bphtb', { label: 'Tarif BPHTB' })}</div><span class="small muted">× (harga − NPOPTKP</span><div style="width:160px">${money('kpr.npoptkp', { label: 'NPOPTKP' })}</div><span class="small muted">)</span></div></td><td data-k="c-bphtb"></td></tr>
+        <tr><td>PPN 11%<br><small class="muted">Rumah baru dari developer</small></td><td class="ed l"><div class="row" style="flex-wrap:nowrap"><label class="row small" style="gap:6px;white-space:nowrap"><input type="checkbox" data-b="kpr.newHome" data-kind="bool" ${S.kpr.newHome ? 'checked' : ''}> Kena PPN</label><span class="small muted" style="margin-left:8px">Insentif PPN DTP</span><div style="width:90px">${pctIn('kpr.ppnDisc', { label: 'Insentif PPN' })}</div></div></td><td data-k="c-ppn"></td></tr>
+        <tr><td>Akta jual beli (AJB)</td><td class="ed l"><div class="row" style="flex-wrap:nowrap"><div style="width:90px">${pctIn('kpr.ajb', { label: 'Tarif AJB' })}</div><span class="small muted">× harga properti</span></div></td><td data-k="c-ajb"></td></tr>
+        <tr><td>Balik nama (BBN)</td><td class="ed l"><div class="row" style="flex-wrap:nowrap"><div style="width:90px">${pctIn('kpr.bbn', { label: 'Tarif BBN' })}</div><span class="small muted">× harga properti</span></div></td><td data-k="c-bbn"></td></tr>
+        <tr><td>Jasa notaris</td><td class="ed l"><div style="width:200px">${money('kpr.notary', { ph: 'mis. 5.000.000', label: 'Jasa notaris' })}</div></td><td data-k="c-notary"></td></tr>
+        <tr><td>Provisi & administrasi</td><td class="ed l"><div class="row" style="flex-wrap:nowrap"><div style="width:90px">${pctIn('kpr.provisi', { label: 'Provisi' })}</div><span class="small muted">× pokok pinjaman</span></div></td><td data-k="c-provisi"></td></tr>
+        <tr><td>Appraisal</td><td class="ed l"><div style="width:200px">${money('kpr.appraisal', { ph: 'mis. 1.000.000', label: 'Appraisal' })}</div></td><td data-k="c-appraisal"></td></tr>
+        <tr><td>Booking fee</td><td class="ed l"><div style="width:200px">${money('kpr.booking', { ph: 'kalau ada', label: 'Booking fee' })}</div></td><td data-k="c-booking"></td></tr>
+        <tr><td>Biaya bank lainnya</td><td class="ed l"><div style="width:200px">${money('kpr.bankOther', { ph: 'asuransi, materai, dll.', label: 'Biaya bank lain' })}</div></td><td data-k="c-bankOther"></td></tr>
+      </tbody><tfoot><tr><td>Total biaya lain-lain</td><td></td><td data-k="c-total"></td></tr></tfoot></table></div></section>
+    <section class="panel mt"><div class="panel-h"><div><h2>Jadwal angsuran</h2><p class="sub">Porsi pokok dan bunga per tahun. Ketuk satu tahun untuk melihat rincian bulanannya.</p></div></div>
+      <div class="chart" data-k="chart"></div>${legend([['var(--c-future)', 'Pokok'], ['var(--c-debt)', 'Bunga']])}
+      <div class="tbl-wrap mt" data-k="sched"></div></section>`;
+  },
+  calc() {
+    const k = S.kpr, c = kprCalc(), o = {};
+    o.dpNom = isNum(k.price) ? `Setara ${rp(k.price * (k.dp || 0))}` : '';
+    if (!c) {
+      o.res = rosette() + `<div class="metric"><div class="lbl">Cicilan per bulan</div><div class="val xl">–</div><div class="foot">Isi harga properti, lama KPR, dan bunga fix.</div></div>`;
+      o.verdict = o.total = o.chart = o.sched = ''; ['bphtb', 'ppn', 'ajb', 'bbn', 'notary', 'provisi', 'appraisal', 'booking', 'bankOther', 'total'].forEach((x) => o['c-' + x] = '–');
+      return o;
+    }
+    const fl = c.Nfl > 0;
+    o.res = rosette() + `<div class="metric" style="position:relative"><div class="lbl">Cicilan per bulan${fl ? ` selama bunga fix (${c.Nf / 12} tahun)` : ''}</div><div class="val xl">${rp(c.payF || c.payFl)}</div>
+      ${fl ? `<div class="foot">Lalu ${rp(c.payFl)} per bulan saat floating ${isNum(k.rateFloat) ? pctf(k.rateFloat, 2) : '0%'}, ${c.Nfl / 12} tahun</div>` : ''}</div>
+      <div class="kv mt" style="position:relative">
+        <div style="background:rgba(255,255,255,.06)"><div class="k" style="color:#9DB6A8">Pokok pinjaman</div><div class="v">${rp(c.P)}</div></div>
+        <div style="background:rgba(255,255,255,.06)"><div class="k" style="color:#9DB6A8">Total bunga</div><div class="v">${rp(c.interest)}</div></div>
+        <div style="background:rgba(255,255,255,.06)"><div class="k" style="color:#9DB6A8">Rasio cicilan</div><div class="v">${c.rMin != null ? (Math.abs(c.rMax - c.rMin) < .0005 ? pctf(c.rMin) : pctf(c.rMin) + ' – ' + pctf(c.rMax)) : '–'}${c.rMin == null ? '<br><small style="color:#9DB6A8">isi penghasilan</small>' : '<br><small style="color:#9DB6A8">dari penghasilan bersih cicilan lain</small>'}</div></div>
+        <div style="background:rgba(255,255,255,.06)"><div class="k" style="color:#9DB6A8">Lunas</div><div class="v">${c.end || dur(c.N)}${c.end ? `<br><small style="color:#9DB6A8">${c.N} kali bayar</small>` : ''}</div></div>
+      </div>`;
+    const v = kprVerdict(c.rMin, c.rMax);
+    o.verdict = v ? `<div class="verdict ${v[0]}">${ic(v[0] === 'ok' ? 'check' : 'alert')}<div><b>${v[1]}</b>${v[2]}</div></div>` : '';
+    const parts = [['Uang muka', 'var(--c-gold)', c.dp], ['Pokok pinjaman', 'var(--c-future)', c.P], ['Bunga', 'var(--c-debt)', c.interest], ['Biaya lain-lain', 'var(--c-living)', c.other]];
+    o.total = `<div class="row" style="align-items:baseline;gap:12px;margin-bottom:12px"><span class="metric"><span class="val">${rp(c.total)}</span></span><span class="muted small">Rasio bunga terhadap pokok ${pctf(c.interest / c.P, 0)}</span></div>
+      <div style="display:flex;height:16px;border-radius:99px;overflow:hidden;gap:2px">${parts.map((p) => p[2] > 0 ? `<i style="flex:${p[2]};background:${p[1]}" data-tip="<b>${p[0]}</b>${tipRow(p[1], pctf(p[2] / c.total), rp(p[2]))}"></i>` : '').join('')}</div>
+      <div class="grid g4 mt">${parts.map((p) => `<div><div class="small muted row" style="gap:6px"><i class="dot" style="background:${p[1]}"></i>${p[0]}</div><div style="font:650 17px var(--display);margin-top:2px" class="tnum">${rp(p[2])}</div></div>`).join('')}</div>`;
+    for (const [kk, val] of Object.entries(c.c)) o['c-' + kk] = rp(val);
+    o['c-total'] = rp(c.other);
+    const years = []; c.sched.forEach((r) => { const key = r.y; let g = years.find((x) => x.y === key); if (!g) { g = { y: key, pr: 0, int: 0, pay: 0, rows: [] }; years.push(g); } g.pr += r.pr; g.int += r.int; g.pay += r.pay; g.rows.push(r); g.bal = r.bal; });
+    const lab = (g) => c.start ? String(g.y) : 'Th ' + g.y;
+    o.chart = (w) => barChart({ w, h: 220, stacked: true, labels: years.map(lab), series: [{ name: 'Pokok', color: 'var(--c-future)', values: years.map((g) => g.pr) }, { name: 'Bunga', color: 'var(--c-debt)', values: years.map((g) => g.int) }] });
+    const open = S.ui.kprOpen || [];
+    o.sched = `<table class="tbl"><thead><tr><th>${c.start ? 'Tahun' : 'Tahun ke'}</th><th>Angsuran</th><th>Pokok</th><th>Bunga</th><th>Sisa pokok</th></tr></thead><tbody>${years.map((g) => `<tr class="yr" data-yr="${g.y}"><td><span class="row" style="gap:6px">${ic(open.includes(g.y) ? 'down' : 'right').replace('<svg ', '<svg style="width:14px;height:14px" ')}${lab(g)}</span></td><td>${rp(g.pay)}</td><td>${rp(g.pr)}</td><td>${rp(g.int)}</td><td>${rp(Math.max(g.bal, 0))}</td></tr>` + (open.includes(g.y) ? g.rows.map((r) => `<tr class="sub"><td style="padding-left:32px">${c.start ? MONTHS[r.m] : 'Bulan ' + r.i}${r.fl ? ' <span class="badge mid">floating</span>' : ''}</td><td>${rp(r.pay)}</td><td>${rp(r.pr)}</td><td>${rp(r.int)}</td><td>${rp(Math.max(r.bal, 0))}</td></tr>`).join('') : '')).join('')}</tbody><tfoot><tr><td>Total</td><td>${rp(c.sched.reduce((a, r) => a + r.pay, 0))}</td><td>${rp(c.P)}</td><td>${rp(c.interest)}</td><td></td></tr></tfoot></table>`;
+    return o;
+  },
+  bind(root) {
+    root.addEventListener('click', (e) => {
+      const r = e.target.closest('[data-yr]'); if (!r) return;
+      const y = +r.dataset.yr; S.ui.kprOpen = S.ui.kprOpen || [];
+      S.ui.kprOpen = S.ui.kprOpen.includes(y) ? S.ui.kprOpen.filter((x) => x !== y) : [...S.ui.kprOpen, y]; save(); refresh();
+    });
+  },
+};
+
+/* ---------------- Tujuan ---------------- */
+const GOAL_IDEAS = ['DP rumah', 'Dana pendidikan anak', 'Ibadah haji atau umrah', 'Menikah', 'Liburan', 'Kendaraan', 'Laptop atau gadget baru'];
+V.tujuan = {
+  title: 'Tujuan keuangan', icon: 'goal', group: 2,
+  html() {
+    const ideas = `<div class="row" style="gap:8px">${GOAL_IDEAS.map((g) => `<button class="chip" data-newgoal="${esc(g)}">${ic('plus').replace('<svg ', '<svg style="width:14px;height:14px" ')}${g}</button>`).join('')}</div>`;
+    return `<p class="lede">Tulis tiap tujuan dengan nominal yang jelas. Kamu akan lihat berapa lama tercapainya kalau uangnya hanya ditabung, dibandingkan kalau ditaruh di instrumen dengan imbal hasil tertentu.</p>
+    ${S.goals.length ? `<div class="row" style="margin-bottom:16px"><button class="btn primary" data-newgoal="">${ic('plus')}Tambah tujuan</button><span class="spacer"></span></div>` : emptyBox('Belum ada tujuan', 'Pilih salah satu ide di bawah atau tambahkan tujuanmu sendiri.', `<button class="btn primary" data-newgoal="">${ic('plus')}Tambah tujuan</button>`) + '<div class="mt">' + ideas + '</div>'}
+    <div class="stack">${S.goals.map((g) => `<article class="goal">
+      <div class="goal-top">${ic('goal').replace('<svg ', '<svg style="width:20px;height:20px;color:var(--c-gold)" ')}<input class="title" data-b="goals.${g.id}.name" data-kind="text" value="${esc(g.name)}" placeholder="Nama tujuan" aria-label="Nama tujuan"><button class="btn ghost sm danger" data-delgoal="${g.id}">${ic('trash')}Hapus</button></div>
+      <div class="goal-body">
+        <div class="form">
+          ${field('Dana yang dibutuhkan', money(`goals.${g.id}.target`), '', 'full')}
+          ${field('Sudah terkumpul', money(`goals.${g.id}.current`))}
+          ${field('Nabung per bulan', money(`goals.${g.id}.saving`))}
+          ${field('Target imbal hasil per tahun', pctIn(`goals.${g.id}.rate`), 'Misalnya reksa dana pasar uang, pendapatan tetap, atau obligasi.', 'full')}
+        </div>
+        <div><div class="kv" data-k="kv-${g.id}"></div><div class="chart mt" data-k="ch-${g.id}"></div></div>
+      </div></article>`).join('')}</div>
+    ${S.goals.length ? `<div class="mt">${ideas}</div>` : ''}`;
+  },
+  calc() {
+    const o = {};
+    for (const g of S.goals) {
+      const c = goalCalc(g);
+      const faster = c.plain != null && c.inv != null ? Math.ceil(c.plain) - c.inv : null;
+      o['kv-' + g.id] = `<div><div class="k">Masih kurang</div><div class="v">${c.gap === 0 ? 'Tercapai' : rp(c.gap)}</div></div>
+        <div><div class="k">Kalau hanya ditabung</div><div class="v">${c.plain != null ? dur(c.plain) : '–'}${c.plain ? `<br><small>${addMonths(c.plain)}</small>` : ''}</div></div>
+        <div class="hl"><div class="k">Dengan imbal hasil ${isNum(g.rate) ? pctf(g.rate, 1) : '0%'}</div><div class="v">${c.inv != null ? dur(c.inv) : '–'}${c.inv ? `<br><small style="color:#9DB6A8">${addMonths(c.inv)}</small>` : ''}</div></div>
+        <div><div class="k">Lebih cepat</div><div class="v">${faster != null && faster > 0 ? dur(faster) : '–'}</div></div>`;
+      if (c.series.length > 1 && isNum(g.target)) {
+        const n = c.series.length, step = n > 60 ? 12 : n > 24 ? 3 : 1, idx = []; for (let i = 0; i < n; i += step) idx.push(i); if (idx.at(-1) !== n - 1) idx.push(n - 1);
+        o['ch-' + g.id] = (w) => lineChart({ w, h: 190, labels: idx.map((i) => i === 0 ? 'Kini' : step === 12 ? `Th ${Math.round(i / 12)}` : `Bln ${i}`), series: [{ name: 'Target', color: 'var(--muted)', values: idx.map(() => g.target), dash: '5 5', width: 1.5 }, { name: 'Hanya ditabung', color: 'var(--c-living)', values: idx.map((i) => c.flat[i]), width: 1.8 }, { name: 'Dengan imbal hasil', color: 'var(--c-gold)', values: idx.map((i) => c.series[i]), area: true, width: 2.6 }] });
+      } else o['ch-' + g.id] = '';
+    }
+    return o;
+  },
+  bind(root) {
+    root.addEventListener('click', (e) => {
+      const n = e.target.closest('[data-newgoal]'); if (n) { const g = { id: uid(), name: n.dataset.newgoal, target: null, current: null, saving: null, rate: 0.05 }; S.goals.push(g); save(); rerender(); setTimeout(() => { const el = $(`[data-b="goals.${g.id}.${g.name ? 'target' : 'name'}"]`, document); el && (el.focus(), el.scrollIntoView({ block: 'center', behavior: 'smooth' })); }, 30); return; }
+      const d = e.target.closest('[data-delgoal]'); if (d) removeWithUndo(() => { S.goals = S.goals.filter((g) => g.id !== d.dataset.delgoal); }, 'Tujuan dihapus');
+    });
+  },
+};
+
+/* ---------------- Investasi ---------------- */
+const PLATFORMS = ['Bibit', 'Bareksa', 'Stockbit', 'Ajaib', 'IPOT', 'Mirae Asset', 'BNI Sekuritas', 'Mandiri Sekuritas', 'BRI Danareksa', 'Pluang', 'Gotrade', 'Interactive Brokers', 'Indodax', 'Pintu', 'Tokocrypto', 'Reku', 'Pegadaian', 'Treasury', 'Bank'];
+const COINS = { BTC: 'bitcoin', ETH: 'ethereum', SOL: 'solana', BNB: 'binancecoin', XRP: 'ripple', ADA: 'cardano', DOGE: 'dogecoin', USDT: 'tether', USDC: 'usd-coin', TRX: 'tron', AVAX: 'avalanche-2', DOT: 'polkadot', LINK: 'chainlink', LTC: 'litecoin', SHIB: 'shiba-inu', PEPE: 'pepe', SUI: 'sui', TON: 'the-open-network' };
+const RD_TYPES = ['RD Pasar Uang', 'RD Pendapatan Tetap', 'RD Campuran', 'RD Saham', 'RD Indeks / ETF', 'SBN / Obligasi', 'Lainnya'];
+const INV_COLS = {
+  rd: { h: ['Jenis', 'Nama produk', 'Platform', 'Nilai beli', 'Nilai sekarang', 'Untung/rugi', '%'], blank: () => ({ type: 'RD Pasar Uang', name: '', plat: '', buy: null, now: null }) },
+  idx: { h: ['Kode', 'Nama perusahaan', 'Platform', 'Lot', 'Harga rata-rata', 'Harga sekarang', 'Nilai pasar', 'Untung/rugi', '%'], blank: () => ({ code: '', name: '', plat: '', lots: null, avg: null, price: null }) },
+  us: { h: ['Kode', 'Platform', 'Jumlah saham', 'Harga rata-rata ($)', 'Harga sekarang ($)', 'Nilai ($)', 'Nilai (Rp)', 'Untung/rugi (Rp)', '%'], blank: () => ({ code: '', plat: '', qty: null, avg: null, price: null }) },
+  crypto: { h: ['Koin', 'Platform', 'Jumlah koin', 'Harga ($)', 'Modal (Rp)', 'Nilai ($)', 'Nilai (Rp)', 'Untung/rugi', '%'], blank: () => ({ coin: '', plat: '', qty: null, price: null, cost: null }) },
+  other: { h: ['Nama', 'Keterangan', 'Nilai beli', 'Nilai sekarang', 'Untung/rugi', '%'], blank: () => ({ name: '', note: '', buy: null, now: null }) },
+};
+V.investasi = {
+  title: 'Monitor investasi', icon: 'trend', group: 3,
+  html() {
+    const tab = S.ui.invTab, list = S.invest[tab], b = (f) => `invest.${tab}.`;
+    const cell = (r, f, kind, o = {}) => {
+      const p = `invest.${tab}.${r.id}.${f}`;
+      if (kind === 'money') return `<td class="ed">${money(p, { bare: true, ph: '', label: f })}</td>`;
+      if (kind === 'dec') return `<td class="ed">${decIn(p, { ph: '', d: o.d ?? 8, label: f })}</td>`;
+      if (kind === 'sel') return `<td class="ed l">${selIn(p, RD_TYPES, { label: 'Jenis' })}</td>`;
+      return `<td class="ed l">${textIn(p, { ph: o.ph || '', list: o.list, label: f, upper: o.upper })}</td>`;
+    };
+    const out = (r, ks) => ks.map((k) => `<td data-k="${k}-${r.id}"></td>`).join('');
+    const del = (r) => `<td style="width:40px;padding:4px"><button class="x btn ghost sm" data-delinv="${r.id}" aria-label="Hapus">${ic('x')}</button></td>`;
+    const rowsH = list.map((r) => {
+      if (tab === 'rd') return `<tr>${cell(r, 'type', 'sel')}${cell(r, 'name', 'text', { ph: 'Nama reksa dana' })}${cell(r, 'plat', 'text', { list: 'dl-plat' })}${cell(r, 'buy', 'money')}${cell(r, 'now', 'money')}${out(r, ['pl', 'pct'])}${del(r)}</tr>`;
+      if (tab === 'idx') return `<tr>${cell(r, 'code', 'text', { ph: 'BBCA', upper: true })}${cell(r, 'name', 'text', { ph: 'opsional' })}${cell(r, 'plat', 'text', { list: 'dl-plat' })}${cell(r, 'lots', 'dec', { d: 0 })}${cell(r, 'avg', 'dec', { d: 2 })}${cell(r, 'price', 'dec', { d: 2 })}${out(r, ['mv', 'pl', 'pct'])}${del(r)}</tr>`;
+      if (tab === 'us') return `<tr>${cell(r, 'code', 'text', { ph: 'AAPL', upper: true })}${cell(r, 'plat', 'text', { list: 'dl-plat' })}${cell(r, 'qty', 'dec', { d: 6 })}${cell(r, 'avg', 'dec', { d: 4 })}${cell(r, 'price', 'dec', { d: 4 })}${out(r, ['mvu', 'mv', 'pl', 'pct'])}${del(r)}</tr>`;
+      if (tab === 'crypto') return `<tr>${cell(r, 'coin', 'text', { ph: 'BTC', list: 'dl-coin', upper: true })}${cell(r, 'plat', 'text', { list: 'dl-plat' })}${cell(r, 'qty', 'dec', { d: 8 })}${cell(r, 'price', 'dec', { d: 6 })}${cell(r, 'cost', 'money')}${out(r, ['mvu', 'mv', 'pl', 'pct'])}${del(r)}</tr>`;
+      return `<tr>${cell(r, 'name', 'text', { ph: 'Emas, P2P, properti sewa' })}${cell(r, 'note', 'text', { ph: 'mis. 10 gram' })}${cell(r, 'buy', 'money')}${cell(r, 'now', 'money')}${out(r, ['pl', 'pct'])}${del(r)}</tr>`;
+    }).join('');
+    const nIn = INV_COLS[tab].h.length;
+    return `<p class="lede">Satu tempat untuk semua portofolio: reksa dana, saham Indonesia, saham US, kripto, sampai emas. Harga diisi manual dari aplikasi tempat kamu berinvestasi. Kurs dolar dan harga kripto populer bisa diambil otomatis.</p>
+    <datalist id="dl-plat">${PLATFORMS.map((p) => `<option value="${p}">`).join('')}</datalist><datalist id="dl-coin">${Object.keys(COINS).map((p) => `<option value="${p}">`).join('')}</datalist>
+    <div class="grid split">
+      <section class="panel vault" data-k="sum"></section>
+      <section class="panel"><h2>Alokasi aset</h2><p class="sub">Berdasarkan nilai pasar dalam rupiah.</p><div class="row" style="gap:20px;align-items:center" data-k="alloc"></div></section>
+    </div>
+    <section class="panel mt"><div class="row"><div class="field" style="width:220px"><span>Kurs USD ke Rupiah</span>${decIn('invest.usdidr', { pre: 'Rp', d: 2, ph: 'mis. 16.300' })}</div><button class="btn sm" data-fx style="align-self:flex-end;margin-bottom:4px">${ic('sync')}Ambil kurs terbaru</button><span class="small muted" style="align-self:flex-end;margin-bottom:12px" data-k="fxNote"></span></div></section>
+    <div class="tabbar mt-l" role="tablist">${INV_CATS.map((c) => `<button role="tab" data-invtab="${c.k}" aria-selected="${tab === c.k}"><i class="dot" style="background:${c.color}"></i>${c.name} <small>${S.invest[c.k].length || ''}</small></button>`).join('')}</div>
+    ${tab === 'crypto' ? `<div class="row" style="margin-bottom:12px"><button class="btn sm" data-cg>${ic('sync')}Ambil harga live</button><span class="small muted" data-k="cgNote">Harga diambil dari CoinGecko untuk ${Object.keys(COINS).slice(0, 6).join(', ')}, dan koin populer lain.</span></div>` : ''}
+    ${list.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr>${INV_COLS[tab].h.map((h, i) => `<th class="${i < ({ rd: 3, idx: 3 }[tab] || 2) ? 'l' : ''}">${h}</th>`).join('')}<th></th></tr></thead><tbody>${rowsH}</tbody><tfoot><tr data-k="foot"></tr></tfoot></table></div>` : ''}
+    <div class="row mt"><button class="btn ${list.length ? '' : 'primary'}" data-addinv>${ic('plus')}Tambah ${INV_CATS.find((c) => c.k === tab).name.toLowerCase()}</button></div>`;
+  },
+  calc() {
+    const t = invTotals(), o = {}, tab = S.ui.invTab;
+    const plPct = t.plBase ? t.pl / t.plBase : null;
+    o.sum = rosette() + `<div class="metric" style="position:relative"><div class="lbl">Total nilai portofolio</div><div class="val xl">${rp(t.mv)}</div><div class="foot">${t.missingFx ? '<span style="color:var(--gold)">Isi kurs USD supaya saham US dan kripto ikut terhitung.</span>' : 'Semua aset dalam rupiah'}</div></div>
+      <div class="kv mt" style="position:relative"><div style="background:rgba(255,255,255,.06)"><div class="k" style="color:#9DB6A8">Modal tercatat</div><div class="v">${rp(t.cost)}</div></div><div style="background:rgba(255,255,255,.06)"><div class="k" style="color:#9DB6A8">Untung/rugi</div><div class="v ${tone(t.pl)}">${rp(t.pl, { plus: true })}${plPct != null ? `<br><small class="${tone(t.pl)}">${pctf(plPct, 2, true)}</small>` : ''}</div></div></div>`;
+    const items = INV_CATS.map((c) => ({ label: c.name, value: t.cats[c.k].mv, color: c.color }));
+    o.alloc = donut(items, { size: 150, th: 20, center: `<div><div class="small muted">${INV_CATS.filter((c) => t.cats[c.k].mv).length} kelas aset</div></div>` }) + `<div class="alloc" style="flex:1;min-width:220px">${items.map((it) => `<div class="r"><i class="dot" style="background:${it.color}"></i><span>${it.label}</span><b>${rpc(it.value)}</b><em>${t.mv ? pctf(it.value / t.mv, 0) : '–'}</em></div>`).join('')}</div>`;
+    o.fxNote = isNum(S.invest.usdidr) ? '' : 'Kurs dipakai untuk saham US dan kripto.';
+    let f = { mv: 0, mvu: 0, pl: 0, base: 0, cost: 0 };
+    for (const r of S.invest[tab]) {
+      const x = invRow(tab, r);
+      o['mv-' + r.id] = rp(x.mv); o['mvu-' + r.id] = usd(x.mvUsd);
+      o['pl-' + r.id] = `<span class="${tone(x.pl)}">${rp(x.pl, { plus: true })}</span>`; o['pct-' + r.id] = `<span class="${tone(x.pct)}">${pctf(x.pct, 2, true)}</span>`;
+      f.mv += x.mv || 0; f.mvu += x.mvUsd || 0; if (x.pl != null) { f.pl += x.pl; f.base += x.cost; } f.cost += x.cost || 0;
+    }
+    const pc = f.base ? f.pl / f.base : null, pl = `<td class="${tone(f.pl)}">${rp(f.pl, { plus: true })}</td><td class="${tone(pc)}">${pctf(pc, 2, true)}</td><td></td>`;
+    if (tab === 'rd' || tab === 'other') o.foot = `<td colspan="${tab === 'rd' ? 3 : 2}">Total</td><td>${rp(f.cost)}</td><td>${rp(f.mv)}</td>${pl}`;
+    if (tab === 'idx') o.foot = `<td colspan="6">Total</td><td>${rp(f.mv)}</td>${pl}`;
+    if (tab === 'us') o.foot = `<td colspan="5">Total</td><td>${usd(f.mvu)}</td><td>${rp(f.mv)}</td>${pl}`;
+    if (tab === 'crypto') o.foot = `<td colspan="4">Total</td><td>${rp(f.cost)}</td><td>${usd(f.mvu)}</td><td>${rp(f.mv)}</td>${pl}`;
+    return o;
+  },
+  bind(root) {
+    root.addEventListener('click', async (e) => {
+      const tb = e.target.closest('[data-invtab]'); if (tb) { S.ui.invTab = tb.dataset.invtab; save(); rerender(); return; }
+      if (e.target.closest('[data-addinv]')) { const r = Object.assign({ id: uid() }, INV_COLS[S.ui.invTab].blank()); S.invest[S.ui.invTab].push(r); save(); rerender(); setTimeout(() => { const ins = $$(`[data-b^="invest.${S.ui.invTab}.${r.id}."]`, document); (ins[1] && S.ui.invTab === 'rd' ? ins[1] : ins[0])?.focus(); }, 30); return; }
+      const d = e.target.closest('[data-delinv]'); if (d) { removeWithUndo(() => { S.invest[S.ui.invTab] = S.invest[S.ui.invTab].filter((r) => r.id !== d.dataset.delinv); }, 'Aset dihapus'); return; }
+      const fx = e.target.closest('[data-fx]');
+      if (fx) {
+        fx.disabled = true; const note = $('[data-k="fxNote"]', root); note.textContent = 'Mengambil kurs…';
+        try {
+          let rate = null, src = '';
+          try { const j = await (await fetch('https://open.er-api.com/v6/latest/USD')).json(); rate = j.rates && j.rates.IDR; src = 'ExchangeRate-API'; } catch (_) { }
+          if (!rate) { const j = await (await fetch('https://api.frankfurter.app/latest?from=USD&to=IDR')).json(); rate = j.rates && j.rates.IDR; src = 'Frankfurter (ECB)'; }
+          if (!rate) throw 0;
+          S.invest.usdidr = Math.round(rate * 100) / 100; save(); rerender(); toast(`Kurs diperbarui: ${rp(rate)} per USD (${src})`);
+        } catch (_) { note.textContent = 'Kurs tidak bisa diambil sekarang. Isi manual dulu, ya.'; fx.disabled = false; }
+        return;
+      }
+      const cg = e.target.closest('[data-cg]');
+      if (cg) {
+        const ids = [...new Set(S.invest.crypto.map((r) => COINS[(r.coin || '').toUpperCase().trim()]).filter(Boolean))];
+        const note = $('[data-k="cgNote"]', root);
+        if (!ids.length) { note.textContent = 'Belum ada koin yang dikenali. Pakai kode seperti BTC, ETH, atau SOL.'; return; }
+        cg.disabled = true; note.textContent = 'Mengambil harga…';
+        try {
+          const j = await (await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd`)).json();
+          let n = 0; for (const r of S.invest.crypto) { const id = COINS[(r.coin || '').toUpperCase().trim()]; if (id && j[id] && isNum(j[id].usd)) { r.price = j[id].usd; n++; } }
+          save(); rerender(); toast(`Harga ${n} koin diperbarui dari CoinGecko`);
+        } catch (_) { note.textContent = 'Harga tidak bisa diambil sekarang. Coba lagi nanti atau isi manual.'; cg.disabled = false; }
+      }
+    });
+  },
+};
+
+/* ---------------- Rebalancing ---------------- */
+V.rebalancing = {
+  title: 'Rebalancing', icon: 'scale', group: 3,
+  html() {
+    const md = S.ui.rebMode, rs = S.rebal.rows;
+    const head = md === 1 ? ['Aset', 'Nilai sekarang', 'Porsi sekarang', 'Porsi target', 'Nilai ideal', 'Tambah / kurangi'] : ['Aset', 'Nilai sekarang', 'Porsi sekarang', 'Tambah / kurangi', 'Nilai baru', 'Porsi baru'];
+    return `<p class="lede">Seiring waktu, porsi aset bergeser karena ada yang naik lebih cepat. Rebalancing mengembalikannya ke komposisi yang kamu inginkan, sesuai tujuan dan profil risikomu.</p>
+    <div class="row" style="margin-bottom:16px"><div class="seg" role="group"><button data-mode="1" aria-pressed="${md === 1}">Dari porsi target</button><button data-mode="2" aria-pressed="${md === 2}">Dari nominal</button></div><span class="spacer"></span><button class="btn sm" data-frominv>${ic('sync')}Ambil dari Monitor Investasi</button></div>
+    <p class="small muted" style="margin:-4px 0 14px">${md === 1 ? 'Isi porsi target tiap aset (totalnya 100%). Kolom terakhir menunjukkan berapa yang perlu ditambah atau dijual.' : 'Isi rencana penambahan atau penjualan tiap aset (pakai tanda minus untuk menjual). Porsi baru langsung terhitung.'}</p>
+    ${rs.length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}<th></th></tr></thead><tbody>${rs.map((r) => `<tr><td class="ed l">${textIn(`rebal.rows.${r.id}.name`, { ph: 'Nama aset' })}</td><td class="ed">${money(`rebal.rows.${r.id}.value`, { bare: true, ph: '' })}</td><td data-k="now-${r.id}"></td>${md === 1 ? `<td class="ed" style="width:120px">${pctIn(`rebal.rows.${r.id}.target`, { ph: '' })}</td><td data-k="ideal-${r.id}"></td><td data-k="diff-${r.id}"></td>` : `<td class="ed">${money(`rebal.rows.${r.id}.adj`, { bare: true, ph: '', neg: true })}</td><td data-k="new-${r.id}"></td><td data-k="newp-${r.id}"></td>`}<td style="width:40px;padding:4px"><button class="x btn ghost sm" data-delr="${r.id}" aria-label="Hapus">${ic('x')}</button></td></tr>`).join('')}</tbody><tfoot><tr data-k="foot"></tr></tfoot></table></div>` : emptyBox('Belum ada aset', 'Tambahkan kelas aset satu per satu, atau ambil langsung dari Monitor Investasi.', `<button class="btn primary" data-addr>${ic('plus')}Tambah aset</button>`)}
+    ${rs.length ? `<div class="row mt"><button class="btn" data-addr>${ic('plus')}Tambah aset</button></div><section class="panel mt"><h2>Sebelum dan sesudah</h2><p class="sub">Porsi tiap aset sekarang dibandingkan dengan ${md === 1 ? 'target' : 'setelah penyesuaian'}.</p><div data-k="viz"></div></section>` : ''}`;
+  },
+  calc() {
+    const md = S.ui.rebMode, rs = S.rebal.rows, o = {};
+    const tot = rs.reduce((a, r) => a + (r.value || 0), 0), tt = rs.reduce((a, r) => a + (r.target || 0), 0);
+    const totAdj = rs.reduce((a, r) => a + (r.adj || 0), 0), totNew = tot + totAdj;
+    let viz = '';
+    rs.forEach((r, i) => {
+      const now = tot ? (r.value || 0) / tot : null; o['now-' + r.id] = pctf(now);
+      let after;
+      if (md === 1) { const ideal = isNum(r.target) ? r.target * tot : null, df = ideal != null ? ideal - (r.value || 0) : null; o['ideal-' + r.id] = rp(ideal); o['diff-' + r.id] = isNum(df) ? `<span class="${tone(df)}">${Math.round(df) === 0 ? 'Sudah pas' : (df > 0 ? 'Tambah ' : 'Kurangi ') + rp(Math.abs(df))}</span>` : '–'; after = r.target; }
+      else { const nv = (r.value || 0) + (r.adj || 0); o['new-' + r.id] = rp(nv); after = totNew ? nv / totNew : null; o['newp-' + r.id] = pctf(after); }
+      const col = ['var(--c-future)', 'var(--c-living)', 'var(--c-plum)', 'var(--c-gold)', 'var(--c-debt)', 'var(--c-income)', 'var(--c-slate)'][i % 7];
+      viz += `<div style="display:grid;grid-template-columns:minmax(90px,160px) 1fr;gap:6px 14px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)"><div class="small" style="font-weight:600">${esc(r.name || 'Tanpa nama')}</div><div><div class="row" style="gap:8px;flex-wrap:nowrap"><div class="bar" style="flex:1;height:10px"><i style="width:${(now || 0) * 100}%;background:var(--line-2)"></i></div><span class="small muted tnum" style="width:48px;text-align:right">${pctf(now, 0)}</span></div><div class="row" style="gap:8px;flex-wrap:nowrap;margin-top:4px"><div class="bar" style="flex:1;height:10px"><i style="width:${clamp(after || 0, 0, 1) * 100}%;background:${col}"></i></div><span class="small tnum" style="width:48px;text-align:right;font-weight:600">${pctf(after, 0)}</span></div></div></div>`;
+    });
+    o.viz = viz + legend([['var(--line-2)', 'Sekarang'], ['var(--c-future)', md === 1 ? 'Target' : 'Sesudah']]);
+    if (md === 1) {
+      const ok = Math.abs(tt - 1) < 0.0005;
+      o.foot = `<td>Total</td><td>${rp(tot)}</td><td>${tot ? '100%' : '–'}</td><td><span class="badge ${ok ? 'ok' : 'bad'}">${pctf(tt, 1)}${ok ? '' : ' (harus 100%)'}</span></td><td>${rp(tt * tot)}</td><td></td><td></td>`;
+    } else {
+      o.foot = `<td>Total</td><td>${rp(tot)}</td><td>${tot ? '100%' : '–'}</td><td><span class="badge ${Math.round(totAdj) === 0 ? 'ok' : 'mid'}">${Math.round(totAdj) === 0 ? 'Hanya memindahkan' : (totAdj > 0 ? 'Uang baru ' : 'Ditarik ') + rp(Math.abs(totAdj))}</span></td><td>${rp(totNew)}</td><td>${totNew ? '100%' : '–'}</td><td></td>`;
+    }
+    return o;
+  },
+  bind(root) {
+    root.addEventListener('click', (e) => {
+      const m = e.target.closest('[data-mode]'); if (m) { S.ui.rebMode = +m.dataset.mode; save(); rerender(); return; }
+      if (e.target.closest('[data-addr]')) { const r = { id: uid(), name: '', value: null, target: null, adj: null }; S.rebal.rows.push(r); save(); rerender(); setTimeout(() => $(`[data-b="rebal.rows.${r.id}.name"]`, document)?.focus(), 30); return; }
+      const d = e.target.closest('[data-delr]'); if (d) { removeWithUndo(() => { S.rebal.rows = S.rebal.rows.filter((r) => r.id !== d.dataset.delr); }, 'Aset dihapus'); return; }
+      if (e.target.closest('[data-frominv]')) {
+        const t = invTotals(); if (!t.any) { toast('Monitor Investasi masih kosong'); return; }
+        const snap = clone(S);
+        for (const c of INV_CATS) {
+          const v = t.cats[c.k].mv; if (!v) continue;
+          let r = S.rebal.rows.find((x) => x.name.toLowerCase() === c.name.toLowerCase());
+          if (!r) { r = { id: uid(), name: c.name, value: null, target: null, adj: null }; S.rebal.rows.push(r); }
+          r.value = Math.round(v);
+        }
+        save(); rerender(); toast('Nilai aset diambil dari Monitor Investasi', () => { S = snap; save(); rerender(); });
+      }
+    });
+  },
+};
+
+/* ---------------- Pensiun ---------------- */
+V.pensiun = {
+  title: 'Persiapan pensiun', icon: 'hour', group: 3,
+  html() {
+    const avg = avgSpend(S.year);
+    return `<p class="lede">Pakai aturan 4%: kalau setiap tahun kamu hanya mengambil sekitar 4% dari dana pensiun, dana itu diperkirakan cukup untuk kurang lebih 30 tahun. Artinya, dana yang dibutuhkan kira-kira 25 kali pengeluaran tahunan saat pensiun.</p>
+    <div class="grid split" style="align-items:start">
+      <section class="panel"><div class="form">
+        ${field('Usia sekarang', decIn('retire.age', { suf: 'tahun', d: 0 }))}
+        ${field('Usia pensiun', decIn('retire.retireAge', { suf: 'tahun', d: 0 }))}
+        ${field('Pengeluaran bulanan sekarang', money('retire.monthly'), 'Biaya hidup normal, sebelum disesuaikan inflasi.', 'full')}
+        ${avg ? `<div class="helper full" style="margin-top:-8px"><button type="button" data-set="retire.monthly" data-val="${Math.round(avg)}">Pakai rata-rata Arus Kas ${S.year}: ${rp(avg)}</button></div>` : ''}
+        ${field('Inflasi per tahun', pctIn('retire.inflation'))}
+        ${field('Tingkat penarikan', pctIn('retire.wr'), 'Standarnya 4%. Makin kecil, makin aman.')}
+        ${field('Dana pensiun yang sudah ada', money('retire.current'), 'Saldo investasi khusus pensiun.', 'full')}
+        ${field('Tabungan per bulan', money('retire.saving'))}
+        ${field('Imbal hasil investasi per tahun', pctIn('retire.ret'))}
+      </div></section>
+      <div class="stack"><section class="panel vault" data-k="res"></section><div data-k="verdict"></div></div>
+    </div>
+    <section class="panel mt"><div class="panel-h"><div><h2>Proyeksi dana pensiun</h2><p class="sub">Pertumbuhan dana dari tabungan rutin dan imbal hasil, dibandingkan dengan kebutuhan.</p></div></div><div class="chart" data-k="chart"></div>${legend([['var(--c-gold)', 'Proyeksi dana'], ['var(--muted)', 'Dana yang dibutuhkan']])}</section>`;
+  },
+  calc() {
+    const r = S.retire, c = retireCalc(), o = {};
+    if (c.years == null || c.need == null) {
+      o.res = rosette() + `<div class="metric"><div class="lbl">Dana pensiun yang dibutuhkan</div><div class="val xl">–</div><div class="foot">${c.years != null && c.years < 0 ? 'Usia pensiun harus lebih besar dari usia sekarang.' : 'Isi usia dan pengeluaran bulanan untuk mulai menghitung.'}</div></div>`;
+      o.verdict = ''; o.chart = ''; return o;
+    }
+    o.res = rosette() + `<div class="metric" style="position:relative"><div class="lbl">Dana pensiun yang dibutuhkan di usia ${r.retireAge}</div><div class="val xl">${rpc(c.need)}</div><div class="foot">${rp(c.yAt)} per tahun ÷ ${pctf(r.wr || .04, 1)}</div></div>
+      <div class="kv mt" style="position:relative">
+        <div style="background:rgba(255,255,255,.06)"><div class="k" style="color:#9DB6A8">Pengeluaran bulanan saat pensiun</div><div class="v">${rp(c.mAt)}</div></div>
+        <div style="background:rgba(255,255,255,.06)"><div class="k" style="color:#9DB6A8">Waktu menabung</div><div class="v">${c.years} tahun<br><small style="color:#9DB6A8">${c.n} bulan</small></div></div>
+        <div style="background:rgba(255,255,255,.06)"><div class="k" style="color:#9DB6A8">Proyeksi dana terkumpul</div><div class="v">${rpc(c.fv)}</div></div>
+        <div style="background:rgba(255,255,255,.06)"><div class="k" style="color:#9DB6A8">Selisih</div><div class="v ${tone(c.diff)}">${rpc(c.diff)}</div></div>
+      </div>`;
+    const ok = c.diff >= 0;
+    o.verdict = `<div class="verdict ${ok ? 'ok' : 'bad'}">${ic(ok ? 'check' : 'alert')}<div><b>${ok ? 'Dana pensiunmu diproyeksikan cukup' : 'Dana pensiun masih kurang'}</b>${ok ? 'Pertahankan disiplin menabung dan tinjau ulang imbal hasil investasimu tiap tahun.' : `Supaya cukup, tabungan pensiun perlu sekitar <b style="display:inline">${rp(c.req)}</b> per bulan dengan imbal hasil ${pctf(r.ret || 0, 1)}. Pilihan lain: naikkan imbal hasil, mundurkan usia pensiun, atau tekan pengeluaran.`}</div></div>`;
+    const ages = c.path.map((_, i) => String((r.age || 0) + i));
+    o.chart = (w) => lineChart({ w, h: 240, labels: ages, series: [{ name: 'Dana dibutuhkan', color: 'var(--muted)', values: ages.map(() => c.need), dash: '5 5', width: 1.5 }, { name: 'Proyeksi dana', color: 'var(--c-gold)', values: c.path, area: true, width: 2.6 }] });
+    return o;
+  },
+  bind(root) { root.addEventListener('click', setBtn); },
+};
+
+/* ---------------- Glosarium ---------------- */
+const GLOSS = [
+  ['Aset', 'Semua yang kamu miliki dan punya nilai uang, misalnya tabungan, investasi, rumah, atau kendaraan.'],
+  ['Kewajiban', 'Utang atau tagihan yang masih harus kamu bayar ke pihak lain.'],
+  ['Kekayaan bersih (net worth)', 'Total aset dikurangi total kewajiban. Angka inilah yang menunjukkan seberapa kaya kamu sebenarnya.'],
+  ['Arus kas (cash flow)', 'Pergerakan uang masuk dan keluar dalam periode tertentu, biasanya sebulan.'],
+  ['Anggaran (budget)', 'Rencana pembagian uang sebelum dipakai, supaya pengeluaran terkendali dan tujuan tetap jalan.'],
+  ['Dana darurat', 'Cadangan uang tunai untuk kejadian mendadak. Umumnya 3 sampai 12 kali pengeluaran wajib per bulan.'],
+  ['Inflasi', 'Kenaikan harga barang dan jasa dari waktu ke waktu, yang membuat daya beli uang turun.'],
+  ['Bunga majemuk', 'Bunga yang dihitung dari pokok ditambah bunga sebelumnya, sehingga uang tumbuh makin cepat seiring waktu.'],
+  ['Imbal hasil (return)', 'Keuntungan dari investasi, bisa berupa bunga, dividen, kupon, atau kenaikan harga.'],
+  ['Dividen', 'Bagian laba perusahaan yang dibagikan kepada pemegang saham.'],
+  ['Saham', 'Bukti kepemilikan sebagian kecil perusahaan. Di Bursa Efek Indonesia, saham diperdagangkan per lot, 1 lot = 100 lembar.'],
+  ['Reksa dana', 'Wadah yang mengumpulkan dana banyak investor lalu dikelola manajer investasi ke berbagai instrumen.'],
+  ['Reksa dana pasar uang (RDPU)', 'Reksa dana berisiko rendah yang menaruh dana di deposito dan surat utang jangka pendek.'],
+  ['Reksa dana pendapatan tetap (RDPT)', 'Reksa dana yang sebagian besar asetnya berupa obligasi.'],
+  ['NAB (nilai aktiva bersih)', 'Nilai total aset reksa dana setelah dikurangi kewajiban. NAB per unit dipakai sebagai harga beli dan jual.'],
+  ['Obligasi dan SBN', 'Surat utang dari perusahaan atau negara yang memberi kupon berkala dan mengembalikan pokok saat jatuh tempo.'],
+  ['Deposito', 'Simpanan bank dengan jangka waktu tetap dan bunga lebih tinggi dari tabungan biasa.'],
+  ['Diversifikasi', 'Menyebar uang ke beberapa jenis aset supaya risiko tidak menumpuk di satu tempat.'],
+  ['Rebalancing', 'Mengatur ulang porsi aset agar kembali sesuai komposisi target.'],
+  ['Aturan 4%', 'Patokan menarik sekitar 4% dana pensiun per tahun agar dana bertahan kira-kira 30 tahun. Kebalikannya, dana yang dibutuhkan sekitar 25 kali pengeluaran tahunan.'],
+  ['Penghasilan pasif', 'Uang yang masuk tanpa harus kamu kerjakan setiap hari, misalnya dividen, kupon, atau sewa.'],
+  ['KPR', 'Kredit pemilikan rumah, pinjaman bank untuk membeli properti yang dicicil dalam jangka panjang.'],
+  ['Bunga fix dan floating', 'Bunga fix tetap selama periode tertentu. Setelah itu berganti bunga floating yang mengikuti suku bunga pasar.'],
+  ['Anuitas', 'Metode cicilan dengan jumlah bayar tetap tiap bulan. Di awal porsi bunga besar, lalu porsi pokok makin besar.'],
+  ['BPHTB', 'Bea perolehan hak atas tanah dan bangunan, pajak yang dibayar pembeli saat membeli properti.'],
+  ['AJB dan BBN', 'Akta jual beli adalah bukti sah transaksi properti. Balik nama adalah proses mengganti nama pemilik di sertifikat.'],
+  ['Unit link', 'Produk asuransi jiwa yang digabung dengan investasi. Biayanya umumnya lebih tinggi dari membeli keduanya terpisah.'],
+];
+V.glosarium = {
+  title: 'Glosarium', icon: 'book', group: 4,
+  html() { return `<p class="lede">Istilah keuangan yang muncul di aplikasi ini, dijelaskan singkat.</p><div class="gl-search"><div class="inp"><input id="glq" placeholder="Cari istilah" aria-label="Cari istilah"></div></div><div class="gl" id="gll">${GLOSS.map(([t, d]) => `<dl data-q="${esc((t + ' ' + d).toLowerCase())}"><dt>${t}</dt><dd>${d}</dd></dl>`).join('')}</div>`; },
+  bind(root) { $('#glq', root).addEventListener('input', (e) => { const q = e.target.value.toLowerCase().trim(); $$('#gll dl', root).forEach((d) => d.style.display = !q || d.dataset.q.includes(q) ? '' : 'none'); }); },
+};
+
+/* ---------------- Data ---------------- */
+V.data = {
+  title: 'Data & backup', icon: 'db', group: 4,
+  html() {
+    return `<p class="lede">Semua data tersimpan di browser perangkat ini saja, tidak dikirim ke server mana pun. Karena itu, simpan file backup secara berkala, terutama sebelum ganti HP atau menghapus riwayat browser.</p>
+    ${canStore ? '' : '<div class="verdict bad" style="margin-bottom:16px">' + ic('alert') + '<div><b>Penyimpanan browser tidak tersedia</b>Mode ini tidak mengizinkan penyimpanan, jadi data akan hilang saat halaman ditutup. Unduh backup sebelum keluar.</div></div>'}
+    <div class="grid g2">
+      <section class="panel"><h2>Profil</h2><p class="sub">Nama dipakai untuk menyapa di Ringkasan.</p>${field('Nama panggilan', textIn('name', { ph: 'Nama kamu' }))}
+        <div class="field mt"><span>Tampilan</span><div class="seg">${[['auto', 'Ikuti sistem'], ['light', 'Terang'], ['dark', 'Gelap']].map(([v, l]) => `<button data-theme-set="${v}" aria-pressed="${S.theme === v}">${l}</button>`).join('')}</div></div></section>
+      <section class="panel"><h2>Backup dan pulihkan</h2><p class="sub">File .json berisi semua catatanmu. Simpan di Google Drive atau kirim ke diri sendiri.</p>
+        <div class="row"><button class="btn primary" data-export>${ic('dl')}Unduh backup</button><label class="btn">${ic('ul')}Pulihkan dari file<input type="file" accept="application/json,.json" data-import hidden></label></div></section>
+      <section class="panel"><h2>Data contoh</h2><p class="sub">${S.demo ? 'Kamu sedang memakai data contoh. Hapus untuk mulai mencatat keuanganmu sendiri.' : 'Isi semua modul dengan angka rekaan untuk mencoba fitur. Data yang ada sekarang akan diganti.'}</p>
+        ${S.demo ? `<button class="btn dark" data-clear>Hapus data contoh & mulai dari nol</button>` : `<button class="btn" data-demo>Muat data contoh</button>`}</section>
+      <section class="panel"><h2>Hapus semua data</h2><p class="sub">Mengosongkan semua modul di perangkat ini. Tidak bisa dibatalkan kecuali kamu punya file backup.</p><button class="btn danger" data-reset>${ic('trash')}Hapus semua data</button></section>
+    </div>
+    <p class="note mt-l">${ic('info')}<span>ur.financialguy adalah alat bantu hitung dan pencatatan. Hasilnya bukan nasihat keuangan profesional. Untuk keputusan besar seperti KPR atau investasi, bandingkan juga dengan penawaran resmi dan konsultasikan bila perlu.</span></p>`;
+  },
+  bind(root) {
+    root.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-theme-set]'); if (t) { S.theme = t.dataset.themeSet; save(); applyTheme(); rerender(); return; }
+      if (e.target.closest('[data-export]')) {
+        const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' }), a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = `urfinancialguy-backup-${new Date().toISOString().slice(0, 10)}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        toast('Backup diunduh'); return;
+      }
+      if (e.target.closest('[data-reset]')) { confirmBox('Hapus semua data?', 'Semua catatan di perangkat ini akan dikosongkan. Pastikan kamu sudah mengunduh backup kalau masih butuh datanya.', 'Hapus semua', () => { const th = S.theme; S = fresh(); S.seen = true; S.theme = th; save(true); location.hash = '#/ringkasan'; rerender(); toast('Semua data dihapus'); }, true); return; }
+      if (e.target.closest('[data-clear]')) { const th = S.theme, nm = S.name; S = fresh(); S.seen = true; S.theme = th; S.name = nm; save(true); location.hash = '#/ringkasan'; rerender(); toast('Data contoh dihapus. Selamat mencatat!'); }
+    });
+    $('[data-import]', root).addEventListener('change', async (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      try { const j = JSON.parse(await f.text()); if (!j || !j.budget || !j.worth) throw 0; confirmBox('Pulihkan backup?', `Data di perangkat ini akan diganti dengan isi file <b>${esc(f.name)}</b>.`, 'Pulihkan', () => { S = migrate(j); S.seen = true; save(true); applyTheme(); rerender(); toast('Backup dipulihkan'); }); }
+      catch (_) { toast('File ini bukan backup ur.financialguy'); }
+      e.target.value = '';
+    });
+  },
+};
+
+/* ============ demo data ============ */
+function demoState() {
+  const s = fresh(); s.seen = true; s.demo = true; s.name = S.name || ''; s.theme = S.theme;
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const vary = (base, pct = .12, round = 10000) => Math.round(base * (1 + (rnd() * 2 - 1) * pct) / round) * round;
+  const R = (g, i) => s.budget.rows[g][i].id, W = (g, i) => s.worth.rows[g][i].id;
+  const y = CUR_Y, lastA = Math.max(CUR_M - 1, 0);
+  for (let m = 0; m <= CUR_M; m++) {
+    const k = mkey(y, m), d = s.budget.data[k] = {}, act = m <= lastA, sal = m >= 6 ? 17500000 : 16000000;
+    const put = (id, p, a) => { d[id] = { p, a: act ? a : null }; };
+    put(R('income', 0), sal, sal);
+    put(R('income', 1), 1500000, [0, 2500000, 1200000, 0, 3000000, 1800000, 0, 2200000, 1500000, 900000, 0, 0][m]);
+    put(R('income', 2), 120000, 120000);
+    if (m === 4) put(R('income', 3), null, 450000);
+    if (m === 9) put(R('income', 3), null, 380000);
+    const L = [[3000000, .1], [2500000, 0], [900000, .18], [350000, 0], [450000, .15], [1400000, .15], [300000, .3], [180000, 0], [600000, .45], [250000, .8]];
+    L.forEach(([b, v], i) => put(R('living', i), b, v ? vary(b, v) : b));
+    put(R('debt', 0), 1150000, 1150000); put(R('debt', 3), 150000, 150000); put(R('debt', 4), 450000, 450000);
+    put(R('debt', 2), 300000, vary(350000, .6));
+    put(R('future', 0), 1750000, m % 3 === 2 ? 1500000 : 2000000); put(R('future', 1), 1000000, 1000000); put(R('future', 2), 750000, m === 3 ? 500000 : 750000);
+  }
+  for (let m = 0; m <= lastA; m++) {
+    const d = s.worth.data[mkey(y, m)] = {};
+    d[W('cash', 0)] = vary(6500000, .2); d[W('cash', 1)] = 6000000 + m * 900000; d[W('cash', 2)] = 38000000 + m * 1000000 + Math.round(m * m * 9000); d[W('cash', 3)] = vary(700000, .3);
+    d[W('invest', 0)] = 38000000 + m * 1850000; d[W('invest', 1)] = vary(17500000 + m * 250000, .05); d[W('invest', 2)] = 9000000 + m * 420000; d[W('invest', 3)] = vary(14000000, .12); d[W('invest', 4)] = 14500000 + m * 520000;
+    d[W('fixed', 1)] = 19500000 - m * 180000; d[W('fixed', 2)] = 16000000 - m * 120000;
+    d[W('other', 1)] = 21000000 + m * 680000;
+    d[W('liab', 2)] = 23000000 - m * 1150000; d[W('liab', 3)] = vary(900000, .5);
+  }
+  s.emergency = { monthly: 12000000, months: 6, current: 38000000 + lastA * 1000000 + Math.round(lastA * lastA * 9000), saving: 1000000 };
+  s.kpr = Object.assign(s.kpr, { price: 650000000, dp: .2, years: 20, rateFix: .0599, fixYears: 3, rateFloat: .105, income: 17500000, other: 1150000, start: `${y + 1}-07`, notary: 5000000, appraisal: 1000000, booking: 0 });
+  s.goals = [
+    { id: uid(), name: 'DP rumah', target: 130000000, current: 32000000, saving: 2000000, rate: .055 },
+    { id: uid(), name: 'Umrah bareng orang tua', target: 90000000, current: 8000000, saving: 1250000, rate: .045 },
+  ];
+  s.invest = {
+    usdidr: 16350,
+    rd: [{ id: uid(), type: 'RD Pasar Uang', name: 'Pasar uang syariah (contoh)', plat: 'Bibit', buy: 14000000, now: 14420000 }, { id: uid(), type: 'RD Pendapatan Tetap', name: 'Obligasi negara (contoh)', plat: 'Bibit', buy: 21000000, now: 22350000 }, { id: uid(), type: 'RD Indeks / ETF', name: 'Indeks LQ45 (contoh)', plat: 'Bareksa', buy: 8000000, now: 7650000 }],
+    idx: [{ id: uid(), code: 'BBRI', name: 'Bank Rakyat Indonesia', plat: 'Stockbit', lots: 15, avg: 4380, price: 4120 }, { id: uid(), code: 'TLKM', name: 'Telkom Indonesia', plat: 'Stockbit', lots: 12, avg: 3020, price: 3150 }, { id: uid(), code: 'BMRI', name: 'Bank Mandiri', plat: 'IPOT', lots: 6, avg: 5450, price: 5600 }],
+    us: [{ id: uid(), code: 'VOO', plat: 'Gotrade', qty: 0.9, avg: 505, price: 548 }, { id: uid(), code: 'AAPL', plat: 'Gotrade', qty: 2.5, avg: 205, price: 218 }],
+    crypto: [{ id: uid(), coin: 'BTC', plat: 'Pintu', qty: 0.0065, price: 98000, cost: 9200000 }, { id: uid(), coin: 'ETH', plat: 'Pintu', qty: 0.12, price: 3450, cost: 6100000 }],
+    other: [{ id: uid(), name: 'Emas batangan', note: '10 gram', buy: 12800000, now: 19600000 }],
+  };
+  const tgt = { 'Reksa dana': .45, 'Saham Indonesia': .25, 'Saham US': .1, 'Kripto': .05, 'Lainnya': .15 };
+  const keep = S; S = s; const t = invTotals(); S = keep;
+  s.rebal.rows = INV_CATS.map((c) => ({ id: uid(), name: c.name, value: Math.round(t.cats[c.k].mv), target: tgt[c.name], adj: null }));
+  s.retire = { age: 29, retireAge: 55, monthly: 9000000, inflation: .035, current: 35000000, saving: 2000000, ret: .08, wr: .04 };
+  const done = [[1, 1, 1, 1], [1, 1, 0, 1], [1, 0, 0], [1, 1, 0, 0], [1, 0], [1, 1, 0], [0, 0]];
+  s.pyramid.forEach((l, i) => l.items.forEach((it, j) => it.done = !!done[i][j]));
+  s.ui = Object.assign(s.ui, { bMonth: lastA, wMonth: lastA });
+  return s;
+}
+function loadDemo() { S = demoState(); save(true); applyTheme(); rerender(); toast('Data contoh dimuat. Hapus kapan saja dari Data & backup.'); }
+
+/* ============ shell & router ============ */
+const NAV_GROUPS = ['', 'Catatan bulanan', 'Perlindungan & tujuan', 'Investasi & pensiun', 'Lainnya'];
+const ORDER = ['ringkasan', 'piramida', 'arus-kas', 'kekayaan', 'dana-darurat', 'tujuan', 'kpr', 'investasi', 'rebalancing', 'pensiun', 'glosarium', 'data'];
+const TABS = ['ringkasan', 'arus-kas', 'kekayaan', 'investasi'];
+let curId = 'ringkasan', lastRoute = '';
+function applyTheme() { const r = document.documentElement; if (S.theme === 'auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', S.theme); const dark = isDark(); $('meta[name=theme-color]')?.setAttribute('content', dark ? '#0A1410' : '#EDF1EB'); const tb = $('#themeBtn'); if (tb) tb.innerHTML = ic(dark ? 'sun' : 'moon'); }
+const isDark = () => S.theme === 'dark' || (S.theme === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+function shell() {
+  let nav = '', g = -1;
+  ORDER.forEach((id) => { const v = V[id]; if (v.group !== g) { g = v.group; if (NAV_GROUPS[g]) nav += `<h6>${NAV_GROUPS[g]}</h6>`; } nav += `<a href="#/${id}" data-nav="${id}">${ic(v.icon)}${v.title}</a>`; });
+  document.body.innerHTML = `<a class="sr" href="#view">Langsung ke konten</a><div class="shell">
+    <aside class="side">${rosette()}<a class="brand" href="#/ringkasan" aria-label="ur.financialguy, ke Ringkasan">${LOGO}<span class="wordmark">ur.<span>financial</span>guy</span></a><nav class="nav" aria-label="Modul">${nav}</nav>
+      <div class="side-foot">Data tersimpan di perangkat ini.<br><a href="#/data" style="color:#DCE8E0">Unduh backup</a> secara berkala.</div></aside>
+    <div class="main"><header class="top" id="top"><a class="m-brand" href="#/ringkasan" aria-label="ur.financialguy">${LOGO}</a><h1 id="title"></h1>
+      <div class="year" id="year"><button type="button" data-y="-1" aria-label="Tahun sebelumnya">${ic('left')}</button><b id="yv"></b><button type="button" data-y="1" aria-label="Tahun berikutnya">${ic('right')}</button></div>
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Ganti tema terang/gelap"></button></header>
+      <div id="demoBar"></div><main class="content" id="view" tabindex="-1"></main></div>
+    <nav class="tabs" aria-label="Navigasi cepat">${TABS.map((id) => `<a href="#/${id}" data-nav="${id}">${ic(V[id].icon)}<span>${id === 'ringkasan' ? 'Ringkasan' : id === 'arus-kas' ? 'Arus kas' : id === 'kekayaan' ? 'Kekayaan' : 'Investasi'}</span></a>`).join('')}<button type="button" id="menuBtn">${ic('menu')}<span>Menu</span></button></nav></div>`;
+  document.body.appendChild(tipEl);
+  $('#year').addEventListener('click', (e) => { const b = e.target.closest('[data-y]'); if (!b) return; S.year += +b.dataset.y; save(); rerender(); });
+  $('#themeBtn').addEventListener('click', () => { S.theme = isDark() ? 'light' : 'dark'; save(); applyTheme(); refresh(); });
+  $('#menuBtn').addEventListener('click', () => {
+    const m = modal(`<h2>Semua modul</h2><div class="grid g2" style="gap:8px;margin-top:12px">${ORDER.map((id) => `<a class="btn" style="justify-content:flex-start;height:46px;border-radius:12px" href="#/${id}" data-close>${ic(V[id].icon)}${V[id].title}</a>`).join('')}</div>`);
+  });
+  addEventListener('scroll', () => $('#top').classList.toggle('scrolled', scrollY > 4), { passive: true });
+  applyTheme();
+}
+function rerender() {
+  const v = V[curId], root = $('#view'), routeChanged = lastRoute !== curId;
+  lastRoute = curId;
+  root.innerHTML = `<div id="vw" class="${routeChanged ? 'view' : ''}">${v.html()}</div>`;
+  v.bind && v.bind($('#vw'));
+  $$('#vw textarea').forEach(autosize);
+  $('#title').textContent = v.title; document.title = `${v.title} | ur.financialguy`;
+  $('#year').style.display = v.yearAware ? '' : 'none'; $('#yv').textContent = S.year;
+  $$('[data-nav]').forEach((a) => a.dataset.nav === curId ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+  $('#demoBar').innerHTML = S.demo ? `<div class="demo-bar"><span>Kamu sedang melihat <b>data contoh</b>. Angkanya rekaan, bebas diutak-atik.</span><button type="button" class="btn sm dark" data-cleardemo>Hapus & mulai dari nol</button></div>` : '';
+  refresh();
+  if (routeChanged) { scrollTo(0, 0); }
+}
+function refresh() {
+  const v = V[curId]; if (!v.calc) return;
+  const o = v.calc();
+  for (const [k, val] of Object.entries(o)) {
+    const el = document.querySelector(`#vw [data-k="${k}"]`); if (!el) continue;
+    const html = typeof val === 'function' ? val(Math.max(260, Math.floor(el.clientWidth || 600))) : val;
+    if (el._h !== html) { el.innerHTML = html; el._h = html; }
+  }
+}
+function route() {
+  const id = (location.hash.match(/^#\/([\w-]+)/) || [])[1];
+  curId = V[id] ? id : 'ringkasan';
+  rerender();
+}
+let rzT; addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { $$('#vw [data-k]').forEach((e) => e._h = null); refresh(); }, 120); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => { applyTheme(); refresh(); });
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-demo]')) {
+    const hasOwn = !S.demo && (Object.keys(S.budget.data).length || Object.keys(S.worth.data).length || S.goals.length || invTotals().any);
+    if (hasOwn) confirmBox('Ganti dengan data contoh?', 'Catatanmu yang sekarang akan diganti angka rekaan. Unduh backup dulu kalau masih butuh.', 'Muat data contoh', loadDemo, true); else loadDemo();
+  }
+  if (e.target.closest('[data-cleardemo]')) { const th = S.theme, nm = S.name; S = fresh(); S.seen = true; S.theme = th; S.name = nm; save(true); rerender(); toast('Data contoh dihapus. Selamat mencatat!'); }
+});
+
+function welcome() {
+  const m = modal(`${rosette()}<div style="position:relative"><div style="width:52px;height:52px;margin-bottom:18px">${LOGO}</div><h2>Halo! Ini ur.financialguy.</h2><p>Catat arus kas, pantau kekayaan bersih, lalu hitung rencana besar seperti dana darurat, KPR, sampai pensiun. Semua data tersimpan di perangkat ini, tanpa akun.</p>
+    <label class="field"><span>Mau dipanggil siapa?</span><div class="inp"><input id="wname" placeholder="Nama panggilan" autocomplete="given-name"></div></label>
+    <div class="acts"><button class="btn" data-w="demo">Coba pakai data contoh</button><button class="btn primary" data-w="start">Mulai dari nol</button></div></div>`, 'welcome');
+  m.el.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-w]'); if (!b) return;
+    S.name = $('#wname', m.el).value.trim(); S.seen = true;
+    if (b.dataset.w === 'demo') { m.close(); loadDemo(); } else { save(true); m.close(); location.hash = '#/arus-kas'; rerender(); }
+  });
+  $('#wname', m.el).addEventListener('keydown', (e) => { if (e.key === 'Enter') $('[data-w="start"]', m.el).click(); });
+}
+
+/* ============ init ============ */
+shell();
+addEventListener('hashchange', route);
+route();
+const qp = new URLSearchParams(location.search);
+if (qp.has('demo')) {
+  history.replaceState(null, '', location.pathname + location.hash);
+  const hasOwn = S.seen && !S.demo && (Object.keys(S.budget.data).length || Object.keys(S.worth.data).length);
+  if (!hasOwn) { S.seen = true; loadDemo(); } else if (!S.demo) confirmBox('Ganti dengan data contoh?', 'Kamu sudah punya catatan sendiri di perangkat ini. Data contoh akan menggantikannya.', 'Muat data contoh', loadDemo, true);
+} else if (!S.seen) welcome();
+if (!canStore) toast('Browser ini tidak mengizinkan penyimpanan. Unduh backup sebelum menutup.');
+if ('serviceWorker' in navigator && location.protocol === 'https:') addEventListener('load', () => navigator.serviceWorker.register('../sw.js', { scope: '../' }).catch(() => { }));
+
+})();
+</script>
+</body>
+</html>
