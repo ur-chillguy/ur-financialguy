@@ -533,6 +533,37 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeri
   .shell{display:block}
 }
 
+/* ---------- challenge ---------- */
+.ch-hero h2{color:#fff}.ch-hero p{color:#C9D8CF;max-width:62ch;margin:6px 0 0}
+.ch-top{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;margin-bottom:16px;align-items:stretch}
+.ch-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.ch-score{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.ch-score .k{font-size:13px;color:#9DB6A8}
+.ch-score .big{font:700 clamp(46px,8vw,68px)/1 var(--display);letter-spacing:-.035em;color:var(--gold);font-variant-numeric:tabular-nums}
+.ch-score .big small{font:500 18px var(--body);color:#9DB6A8;letter-spacing:0}
+.ch-side{display:flex;flex-direction:column;gap:6px;align-items:flex-start;font-size:14px;color:#C9D8CF;min-width:0}
+.ch-side b{color:#fff;font:650 17px var(--display)}
+.ch-hero .bar{background:rgba(255,255,255,.12)}
+.ch-hero .bar i{display:block;height:100%;border-radius:99px}
+.ch-days{display:grid;grid-template-columns:repeat(15,minmax(0,1fr));gap:5px}
+.ch-d{aspect-ratio:1;border-radius:6px;background:var(--sunken);display:block}
+.ch-d.on{background:var(--gold)}.ch-d.today{outline:2px solid var(--ink);outline-offset:1px}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-top:1px solid var(--line)}
+.ch-card .panel-h+.chk{border-top:0;padding-top:4px}
+.chk .ti{flex:1;min-width:0}.chk .ti small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.chk .btn.sm{flex:none}
+.chk .ta{margin-top:10px}.chk .ta textarea{width:100%;resize:none;min-height:76px}
+.ck{display:flex;gap:9px;align-items:center;margin-top:10px;font-size:14px}.ck input{width:18px;height:18px;accent-color:var(--brand)}
+.skip-add{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}.skip-add .inp{flex:1;min-width:180px}
+.skip-l{margin-top:8px;display:grid;gap:8px}
+.skip-i{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.skip-i .ti{flex:1;min-width:140px}.skip-i .ti b{display:block}.skip-i .ti small{display:block;color:var(--muted);font-size:12.5px}
+.ch-bar b{font-weight:650}
+.inp.ta{height:auto;align-items:stretch}.inp textarea{display:block;width:100%;border:0;background:none;outline:0;padding:10px 12px;line-height:1.45}
+.ch-wk{display:grid;gap:7px;margin-top:18px;font-size:13.5px;color:#C9D8CF}.ch-wk div{display:flex;justify-content:space-between;gap:10px}.ch-wk b{color:#fff;font-variant-numeric:tabular-nums}
+.ch-top{align-items:start}
+@media (max-width:860px){.ch-top,.ch-grid{grid-template-columns:1fr}}
+@media (max-width:560px){.ch-days{grid-template-columns:repeat(10,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -707,6 +738,7 @@ function fresh() {
     v: 1, seen: false, demo: false, name: '', theme: 'auto', year: CUR_Y,
     ui: { bMonth: CUR_M, wMonth: CUR_M, invTab: 'rd', rebMode: 1, tMonth: CUR_M, tType: 'all', tList: 'new', tSort: 'over', tAll: false, tMore: false, tCat: null, txd: { type: 'out', cat: null, amt: null, d: '', note: '' } },
     tx: [],
+    ch: null,
     pyramid: PYR.map((l) => ({ id: uid(), items: l.items.map((text) => ({ id: uid(), text, done: false })) })),
     budget: {
       rows: {
@@ -751,6 +783,7 @@ function migrate(s) {
   /* catatan harian: draf formulir selalu mulai bersih (tanggal otomatis), jenis & kategori terakhir dipertahankan */
   const dr = Object.assign(fresh().ui.txd, (s.ui && s.ui.txd) || {});
   out.ui.txd = { type: ['out', 'in', 'sv'].includes(dr.type) ? dr.type : 'out', cat: dr.cat || null, amt: null, d: '', note: '' };
+  out.ch = (s.ch && s.ch.start && Array.isArray(s.ch.skip)) ? Object.assign({ base: {}, ev: {}, skip: [], leak: '', nodebt: false, r1: '', r2: '' }, s.ch) : null;
   out.tx = Array.isArray(s.tx) ? s.tx.filter((t) => t && t.id && /^\d{4}-\d{2}-\d{2}$/.test(t.d || '') && isNum(t.amt)) : [];
   return out;
 }
@@ -765,6 +798,7 @@ function txIdx() {
 }
 function save(now) {
   _txc = null;
+  if (S.ch) chTrack();
   clearTimeout(saveT);
   const go = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { canStore = false; } };
   if (now) go(); else saveT = setTimeout(go, 250);
@@ -2045,7 +2079,7 @@ function addTx() {
   const focusAmt = () => setTimeout(() => $('[data-txform] [data-b="ui.txd.amt"]')?.focus(), 30);
   if (!isNum(dr.amt) || dr.amt <= 0) { toast('Isi jumlahnya dulu'); focusAmt(); return; }
   if (!cat) { toast('Belum ada kategori. Pilih “+ Kategori baru” dulu.'); return; }
-  const t = { id: uid(), d, cat, amt: dr.amt, note: (dr.note || '').trim() };
+  const t = { id: uid(), d, cat, amt: dr.amt, note: (dr.note || '').trim(), ts: Date.now() };
   S.tx.push(t); dr.amt = null; dr.note = ''; dr.cat = cat;
   const [ty, tm] = d.split('-').map(Number), moved = ty !== S.year || tm - 1 !== S.ui.tMonth;
   if (curId === 'catatan' || moved) { S.year = ty; S.ui.tMonth = tm - 1; }
@@ -2278,9 +2312,160 @@ function demoState() {
 }
 function loadDemo() { S = demoState(); save(true); applyTheme(); rerender(); toast('Data contoh dimuat. Hapus kapan saja dari Data & backup.'); }
 
+/* ============ Challenge 30 hari ============ */
+const CH_DAYS = 30, CH_GATE = 25, CH_SALT = 'urfg-ch1-2026', DAY = 864e5;
+const WEEKS = [['Fondasi', '1–7', 6], ['Bocor', '8–14', 13], ['Perisai', '15–21', 20], ['Tumbuh', '22–30', 29]];
+const fp = (x) => String(Math.round(x * 10) / 10).replace('.', ',');
+const freshCh = (name, org) => ({ on: true, name, org, start: ymd(new Date()), at: Date.now(), base: {}, ev: {}, skip: [], leak: '', nodebt: false, r1: '', r2: '' });
+const chMid = () => new Date(S.ch.start + 'T00:00:00').getTime();
+const chDay = (ts) => Math.floor((ts - chMid()) / DAY);
+function chFnv(str) { let h = 0x811c9dc5; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16).padStart(8, '0'); }
+const bRows = (g) => S.budget.rows[g] || [];
+const planAny = (pred) => Object.values(S.budget.data).some((m) => pred(m || {}));
+const txt = (k, n) => () => (S.ch[k] || '').trim().length >= n;
+/* w = minggu batas poin penuh (1-4), 5 = tanpa batas waktu */
+const CHK = [
+  { k: 'f1', w: 1, pts: 5, t: 'Rencana Arus Kas terisi', d: 'Isi rencana bulan ini: minimal 3 pos pengeluaran, termasuk satu pos Masa depan (SIP atau tabungan). Ini pembagian Sharing, SIP, Spending kamu.', go: 'arus-kas', test: () => planAny((m) => { let n = 0, fut = false; for (const g of BUD_GROUPS) { if (g.inflow) continue; for (const r of bRows(g.k)) { const c = m[r.id]; if (c && isNum(c.p) && c.p > 0) { n++; if (g.k === 'future') fut = true; } } } return n >= 3 && fut; }) },
+  { k: 'f2', w: 1, pts: 5, t: 'Kekayaan bersih awal', d: 'Isi minimal dua angka di Kekayaan: saldo rekening, e-wallet, atau utang yang ada.', go: 'kekayaan', test: () => Object.values(S.worth.data).some((m) => Object.values(m || {}).filter(isNum).length >= 2) },
+  { k: 'f3', w: 1, pts: 5, t: 'Posisi di Piramida', d: 'Centang minimal dua hal yang sudah kamu punya di Piramida Keuangan.', go: 'piramida', test: () => S.pyramid.reduce((n, l) => n + l.items.filter((i) => i.done).length, 0) >= 2 },
+  { k: 'b1', w: 2, pts: 9, t: 'Tiga kali batal beli', d: 'Tahan dulu 24 jam sebelum beli. Kalau besoknya sudah tidak butuh, tandai batal beli. Tiga hari berbeda, 3 poin tiap kali.', multi: true },
+  { k: 'b2', w: 2, pts: 6, t: 'Satu kebocoran yang dipotong', d: 'Tulis satu pengeluaran kecil yang kamu hentikan atau kurangi (minimal 15 huruf).', input: 'leak', test: txt('leak', 15) },
+  { k: 'p1', w: 3, pts: 8, t: 'Dana darurat dimulai', d: 'Isi pengeluaran wajib bulanan, lalu isi dana yang sudah ada atau tabungan per bulan untuk dana darurat.', go: 'dana-darurat', test: () => isNum(S.emergency.monthly) && S.emergency.monthly > 0 && (S.emergency.current > 0 || S.emergency.saving > 0) },
+  { k: 'p2', w: 3, pts: 7, t: 'Cicilan dan paylater terdata', d: 'Masukkan semua cicilan dan paylater ke pos Kewajiban di Arus Kas. Kalau memang tidak punya, centang saja kotak di bawah.', go: 'arus-kas', check: 'nodebt', test: () => !!S.ch.nodebt || planAny((m) => bRows('debt').some((r) => m[r.id] && m[r.id].p > 0)) },
+  { k: 't1', w: 4, pts: 6, t: 'Satu tujuan keuangan', d: 'Tulis satu tujuan lengkap dengan dana yang dibutuhkan dan tabungan per bulan.', go: 'tujuan', test: () => S.goals.some((g) => g.target > 0 && g.saving > 0) },
+  { k: 't2', w: 4, pts: 5, t: 'Investasi atau SIP tercatat', d: 'Isi minimal satu aset di Monitor Investasi, atau catat setoran SIP di Catatan harian pada kategori Masa depan.', go: 'investasi', test: () => { const ids = new Set(bRows('future').map((r) => r.id)); return invTotals().any || S.tx.some((t) => ids.has(t.cat)); } },
+  { k: 't3', w: 4, pts: 4, t: 'Tinjau Ringkasan bulan ini', d: 'Buka Ringkasan di minggu keempat (hari ke-22 sampai 30) dan lihat rasio kesehatan keuanganmu.', go: 'ringkasan', test: () => S.ch.ev.t3 != null },
+  { k: 'r1', w: 5, pts: 5, t: 'Refleksi: apa yang berubah', d: 'Minimal 60 huruf.', input: 'r1', test: txt('r1', 60) },
+  { k: 'r2', w: 5, pts: 5, t: 'Refleksi: apa yang masih bocor', d: 'Minimal 60 huruf.', input: 'r2', test: txt('r2', 60) },
+];
+const CK = Object.fromEntries(CHK.map((c) => [c.k, c]));
+const wFactor = (w, ts) => { if (w === 5) return 1; const di = chDay(ts), end = w === 4 ? CH_DAYS - 1 : w * 7 - 1; return di <= end ? 1 : di <= CH_DAYS - 1 ? .5 : 0; };
+function chTrack() {
+  const c = S.ch; if (!c) return;
+  for (const x of CHK) { if (x.multi || x.k === 't3' || c.base[x.k] || c.ev[x.k] != null) continue; try { if (x.test()) c.ev[x.k] = Date.now(); } catch (_) { } }
+}
+function chVisit() {
+  const c = S.ch, di = chDay(Date.now());
+  if (di >= 21 && di <= CH_DAYS - 1 && c.ev.t3 == null) { c.ev.t3 = Date.now(); save(); }
+}
+function chScore() {
+  const c = S.ch, r = { chk: {}, w: [0, 0, 0, 0], rf: 0, k: 0, days: 0, streak: 0, ontime: 0, skipN: 0, set: new Set(), total: 0 };
+  let ot = 0;
+  for (const t of S.tx) {
+    if (!isNum(t.ts)) continue; const di = chDay(t.ts); if (di < 0 || di >= CH_DAYS) continue;
+    if (t.d === ymd(new Date(t.ts)) || t.d === ymd(new Date(t.ts - DAY))) { r.set.add(di); ot++; }
+  }
+  r.days = r.set.size; r.ontime = ot; r.k = Math.min(CH_DAYS, r.days);
+  let run = 0; for (let i = 0; i < CH_DAYS; i++) { if (r.set.has(i)) { run++; r.streak = Math.max(r.streak, run); } else run = 0; }
+  for (const x of CHK) {
+    if (x.multi) {
+      const seen = new Set(), done = c.skip.filter((s) => s.done).sort((a, b) => a.done - b.done); let pts = 0, n = 0;
+      for (const s of done) { const di = chDay(s.done); if (di < 0 || di >= CH_DAYS || seen.has(di) || n >= 3) continue; seen.add(di); n++; pts += 3 * wFactor(x.w, s.done); }
+      r.chk[x.k] = { ok: n >= 3, n, pts, max: x.pts }; r.skipN = n; r.w[x.w - 1] += pts; continue;
+    }
+    const base = !!c.base[x.k], ev = c.ev[x.k], ok = !base && ev != null && x.test(), pts = ok ? x.pts * wFactor(x.w, ev) : 0;
+    r.chk[x.k] = { ok, base, pts, max: x.pts, late: ok && pts < x.pts };
+    if (x.w === 5) r.rf += pts; else r.w[x.w - 1] += pts;
+  }
+  r.total = Math.round((r.k + r.w.reduce((a, b) => a + b, 0) + r.rf) * 10) / 10;
+  return r;
+}
+function chCode() {
+  const sc = chScore(), c = S.ch;
+  const p = { v: 1, n: c.name, o: c.org, s: c.start, g: ymd(new Date()), dy: sc.days, st: sc.streak, ot: sc.ontime, k: sc.k, w: sc.w.map((x) => Math.round(x * 10) / 10), rf: sc.rf, t: sc.total, ok: sc.days >= CH_GATE ? 1 : 0, sk: sc.skipN, c: Object.fromEntries(Object.entries(sc.chk).map(([k, v]) => [k, Math.round(v.pts * 10) / 10])), r: [(c.r1 || '').trim().length, (c.r2 || '').trim().length] };
+  const json = JSON.stringify(p), b64 = btoa(unescape(encodeURIComponent(json))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  return `UFG1.${b64}.${chFnv(CH_SALT + json)}`;
+}
+const chInfo = () => { const di = chDay(Date.now()); return { di, label: di < 0 ? 'Belum mulai' : di >= CH_DAYS ? 'Waktu 30 hari selesai' : `Hari ke-${di + 1} dari ${CH_DAYS}`, over: di >= CH_DAYS }; };
+function chBar() {
+  if (!S.ch || curId === 'challenge') return '';
+  const sc = chScore();
+  return `<div class="demo-bar ch-bar"><span><b>Challenge 30 Hari</b> · ${chInfo().label} · skor ${fp(sc.total)} dari 100</span><a class="btn sm dark" href="#/challenge">Buka</a></div>`;
+}
+function chStartModal() {
+  if (S.demo) { toast('Hapus data contoh dulu dari Data & backup, lalu mulai challenge.'); return; }
+  const m = modal(`<h2>Mulai Challenge 30 Hari</h2><p>Hitungan 30 hari mulai hari ini. Skor dihitung otomatis di perangkat ini dari catatan dan modul yang kamu isi.</p>
+    <div class="form">${field('Nama lengkap', '<div class="inp"><input id="chn" autocomplete="name" maxlength="60" placeholder="Nama sesuai data binaan"></div>', '', 'full')}${field('Kampus atau asal', '<div class="inp"><input id="cho" maxlength="60" placeholder="Misal: ULM, Poliban, UNISKA"></div>', '', 'full')}</div>
+    <p class="note" style="margin-top:14px">${ic('info')}<span>Isian yang sudah ada sebelum hari ini tidak dihitung sebagai misi. Cap waktu tiap catatan diambil dari jam perangkat.</span></p>
+    <div class="acts"><button class="btn" data-close>Batal</button><button class="btn primary" data-chgo>Mulai 30 hari</button></div>`);
+  $('#chn', m.el).value = S.name || '';
+  $('[data-chgo]', m.el).onclick = () => {
+    const n = $('#chn', m.el).value.trim(), o = $('#cho', m.el).value.trim();
+    if (n.length < 3) { toast('Isi nama lengkapmu dulu'); return; }
+    if (o.length < 2) { toast('Isi kampus atau asalmu'); return; }
+    S.ch = freshCh(n, o); if (!S.name) S.name = n.split(' ')[0];
+    for (const x of CHK) { if (x.multi || x.k === 't3') continue; try { if (x.test()) S.ch.base[x.k] = true; } catch (_) { } }
+    save(true); m.close(); rerender(); toast('Challenge dimulai. Selamat berjuang!');
+  };
+}
+V.challenge = {
+  title: 'Challenge 30 Hari', icon: 'goal', group: 0,
+  html() {
+    if (!S.ch) return `<section class="panel vault ch-hero"><h2>Challenge 30 Hari</h2><p>Praktikkan materi Money Management selama sebulan di ur.financialguy: catat harian, rapikan rencana, bangun dana darurat, sampai punya tujuan. Skor maksimal 100 dihitung otomatis. Satu pemenang membawa pulang Rp500.000.</p>
+      <div class="row" style="margin-top:16px"><button class="btn primary" data-chstart>${ic('plus')}Mulai challenge</button><a class="btn dark" href="../challenge/">Baca aturan lengkap</a></div></section>`;
+    const wk = (i) => { const [nm, rg] = WEEKS[i], items = CHK.filter((x) => x.w === i + 1);
+      return `<section class="panel ch-card"><div class="panel-h"><div><h2>Minggu ${i + 1}: ${nm}</h2><p class="sub">Hari ${rg}. Selesai paling lambat di hari ke-${WEEKS[i][2] + 1} dapat poin penuh, setelah itu setengah.</p></div><span class="badge" data-k="mp${i + 1}"></span></div>${items.map(chkRow).join('')}</section>`; };
+    return `<div class="ch-top"><section class="panel vault ch-hero" data-k="hd"></section>
+      <section class="panel"><div class="panel-h"><div><h2>Konsistensi catat</h2><p class="sub">1 poin per hari yang punya catatan tepat waktu (dicatat di hari kejadian, kemarin masih boleh). Maks 30 poin.</p></div><span class="badge" data-k="mpk"></span></div><div data-k="cons"></div></section></div>
+      <div class="ch-grid">${[0, 1, 2, 3].map(wk).join('')}
+      <section class="panel ch-card"><div class="panel-h"><div><h2>Refleksi akhir</h2><p class="sub">Tulis dengan jujur, kalimatmu sendiri. Ini juga dibaca juri.</p></div><span class="badge" data-k="mprf"></span></div>${CHK.filter((x) => x.w === 5).map(chkRow).join('')}</section></div>
+      <section class="panel mt"><h2>Kode hasil</h2><p class="sub">Berisi nama, rincian skor, dan tanggal. Tidak ada nominal uangmu di dalamnya. Tempel kode ini di formulir pengumpulan saat challenge selesai. Syarat masuk final: minimal ${CH_GATE} hari tercatat.</p>
+        <div class="row"><button class="btn primary" data-chcode>${ic('copy')}Buat kode hasil</button><span class="spacer"></span><button class="btn danger" data-chquit>${ic('trash')}Keluar dari challenge</button></div></section>`;
+  },
+  calc() {
+    if (!S.ch) return {};
+    const sc = chScore(), inf = chInfo(), o = {};
+    o.hd = `<div class="ch-score"><div><div class="k">Skor kamu</div><div class="big">${fp(sc.total)}<small> / 100</small></div></div><div class="ch-side"><b>${inf.label}</b><span>${esc(S.ch.name)} · ${esc(S.ch.org)}</span><span class="badge ${sc.days >= CH_GATE ? 'ok' : 'mid'}">Syarat final: ${sc.days}/${CH_GATE} hari tercatat</span></div></div>
+      <div class="bar mt"><i style="width:${Math.min(100, sc.total)}%;background:var(--gold)"></i></div><div class="ch-wk">${[['Konsistensi catat', sc.k, 30], ...WEEKS.map((w, i) => ['Minggu ' + (i + 1) + ': ' + w[0], sc.w[i], 15]), ['Refleksi', sc.rf, 10]].map(([n, v, m]) => `<div><span>${n}</span><b>${fp(v)} / ${m}</b></div>`).join('')}</div>${inf.over ? `<p class="sub" style="margin:12px 0 0;color:#E3EEE7">Waktu 30 hari sudah selesai. Lengkapi refleksi lalu buat kode hasil.</p>` : ''}`;
+    const today = inf.di;
+    o.cons = `<div class="ch-days">${Array.from({ length: CH_DAYS }, (_, i) => `<i class="ch-d${sc.set.has(i) ? ' on' : ''}${i === today ? ' today' : ''}" title="Hari ke-${i + 1}"></i>`).join('')}</div><div class="kv mt"><div><div class="k">Hari tercatat</div><div class="v">${sc.days}<small> / ${CH_DAYS}</small></div></div><div><div class="k">Streak terpanjang</div><div class="v">${sc.streak}<small> hari</small></div></div></div>`;
+    o.mpk = `${fp(sc.k)} / 30`;
+    sc.w.forEach((p, i) => { const mx = CHK.filter((x) => x.w === i + 1).reduce((a, x) => a + x.pts, 0); o['mp' + (i + 1)] = `${fp(p)} / ${mx}`; });
+    o.mprf = `${fp(sc.rf)} / 10`;
+    for (const x of CHK) {
+      const s = sc.chk[x.k]; let h;
+      if (x.multi) h = `<span class="badge ${s.ok ? 'ok' : ''}">${s.n} / 3 · +${fp(s.pts)}</span>`;
+      else if (s.base) h = `<span class="badge">Sudah ada sebelum challenge</span>`;
+      else if (s.ok) h = `<span class="badge ok">${ic('check').replace('<svg ', '<svg style="width:14px;height:14px" ')} +${fp(s.pts)}${s.late ? ' (setengah)' : ''}</span>`;
+      else h = `<span class="badge">Belum · ${x.pts} poin</span>`;
+      o['st-' + x.k] = h;
+    }
+    const sk = S.ch.skip.slice().sort((a, b) => b.ts - a.ts);
+    o.skip = sk.length ? sk.map((s) => { const left = s.ts + DAY - Date.now(), hr = Math.max(1, Math.ceil(left / 36e5));
+      return `<div class="skip-i"><span class="ti"><b>${esc(s.note)}</b><small>${s.done ? 'Batal beli tercatat' : left > 0 ? `Ditahan, tunggu sekitar ${hr} jam lagi` : 'Sudah 24 jam. Masih mau beli?'}</small></span>${s.done ? `<span class="badge ok">Batal beli</span>` : `<button class="btn sm" data-skipno="${s.id}">Akhirnya beli</button><button class="btn sm primary" data-skipok="${s.id}" ${left > 0 ? 'disabled' : ''}>Batal beli</button>`}</div>`; }).join('') : '';
+    return o;
+  },
+  bind(root) {
+    if (!S.ch) { root.addEventListener('click', (e) => { if (e.target.closest('[data-chstart]')) chStartModal(); }); return; }
+    root.addEventListener('click', (e) => {
+      if (e.target.closest('[data-skipadd]')) {
+        const el = $('#skn', root), v = el.value.trim(); if (v.length < 3) { toast('Tulis dulu barang yang lagi kamu tahan'); return; }
+        S.ch.skip.push({ id: uid(), note: v.slice(0, 80), ts: Date.now(), done: null }); save(true); rerender(); toast('Dicatat. Tahan 24 jam, lalu putuskan.'); return;
+      }
+      const ok = e.target.closest('[data-skipok]'); if (ok) { const s = S.ch.skip.find((x) => x.id === ok.dataset.skipok); if (!s || Date.now() - s.ts < DAY) { toast('Belum 24 jam'); return; } s.done = Date.now(); save(true); rerender(); toast('Batal beli tercatat. Uangmu aman.'); return; }
+      const no = e.target.closest('[data-skipno]'); if (no) { S.ch.skip = S.ch.skip.filter((x) => x.id !== no.dataset.skipno); save(true); rerender(); toast('Tidak apa-apa, yang penting sudah sadar sebelum beli.'); return; }
+      if (e.target.closest('[data-chcode]')) {
+        const code = chCode(), sc = chScore();
+        const m = modal(`<h2>Kode hasil</h2><p>Skor saat ini ${fp(sc.total)} dari 100. Salin kode di bawah dan tempel di formulir pengumpulan. Kamu boleh membuat ulang kapan saja.</p><div class="inp ta"><textarea id="chc" readonly rows="5" style="font:12px/1.4 monospace;word-break:break-all">${code}</textarea></div>
+          ${sc.days >= CH_GATE ? '' : `<p class="note" style="margin-top:12px">${ic('alert')}<span>Hari tercatat baru ${sc.days}, syarat final minimal ${CH_GATE}.</span></p>`}
+          <div class="acts"><button class="btn" data-close>Tutup</button><button class="btn primary" data-cc>${ic('copy')}Salin kode</button></div>`);
+        $('[data-cc]', m.el).onclick = async () => { const t = $('#chc', m.el); try { await navigator.clipboard.writeText(t.value); toast('Kode disalin'); } catch (_) { t.select(); document.execCommand && document.execCommand('copy'); toast('Kode disalin'); } };
+        return;
+      }
+      if (e.target.closest('[data-chquit]')) { confirmBox('Keluar dari challenge?', 'Progres challenge dihapus dari perangkat ini. Catatan keuanganmu tidak ikut terhapus.', 'Keluar', () => { S.ch = null; save(true); rerender(); toast('Keluar dari challenge'); }, true); }
+    });
+  },
+};
+function chkRow(x) {
+  const extra = x.multi ? `<div class="skip-add"><div class="inp"><input id="skn" maxlength="80" placeholder="Barang yang lagi kamu tahan, misal: sepatu diskon" aria-label="Barang yang ditahan"></div><button class="btn sm primary" data-skipadd>${ic('plus')}Tahan 24 jam</button></div><div class="skip-l" data-k="skip"></div>`
+    : x.input ? `<div class="inp ta"><textarea rows="3" data-b="ch.${x.input}" data-kind="text" placeholder="${x.input === 'leak' ? 'Contoh: berhenti beli kopi kekinian tiap hari, ganti bawa dari rumah' : 'Tulis dengan kalimatmu sendiri'}" aria-label="${esc(x.t)}">${esc(S.ch[x.input] || '')}</textarea></div>`
+      : x.check ? `<label class="ck"><input type="checkbox" data-b="ch.${x.check}" data-kind="bool" ${S.ch[x.check] ? 'checked' : ''}> Saya memang tidak punya cicilan atau paylater</label>` : '';
+  return `<div class="chk"><div class="ti"><div class="row" style="gap:8px;margin-bottom:2px"><b>${x.t}</b><span data-k="st-${x.k}"></span></div><small>${x.d}</small>${extra}</div>${x.go ? `<a class="btn sm" href="#/${x.go}">Buka</a>` : ''}</div>`;
+}
+
 /* ============ shell & router ============ */
 const NAV_GROUPS = ['', 'Pencatatan', 'Perlindungan & tujuan', 'Investasi & pensiun', 'Lainnya'];
-const ORDER = ['ringkasan', 'piramida', 'catatan', 'arus-kas', 'kekayaan', 'dana-darurat', 'tujuan', 'kpr', 'investasi', 'rebalancing', 'pensiun', 'glosarium', 'data'];
+const ORDER = ['ringkasan', 'piramida', 'challenge', 'catatan', 'arus-kas', 'kekayaan', 'dana-darurat', 'tujuan', 'kpr', 'investasi', 'rebalancing', 'pensiun', 'glosarium', 'data'];
 const TABS = ['ringkasan', 'catatan', 'arus-kas', 'kekayaan'];
 const TAB_LABEL = { ringkasan: 'Ringkasan', catatan: 'Catatan', 'arus-kas': 'Arus kas', kekayaan: 'Kekayaan' };
 let curId = 'ringkasan', lastRoute = '';
@@ -2319,7 +2504,7 @@ function rerender() {
   $('#title').textContent = v.title; document.title = `${v.title} | ur.financialguy`;
   $('#year').style.display = v.yearAware ? '' : 'none'; $('#yv').textContent = S.year;
   $$('[data-nav]').forEach((a) => a.dataset.nav === curId ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
-  $('#demoBar').innerHTML = S.demo ? `<div class="demo-bar"><span>Kamu sedang melihat <b>data contoh</b>. Angkanya rekaan, bebas diutak-atik.</span><button type="button" class="btn sm dark" data-cleardemo>Hapus & mulai dari nol</button></div>` : '';
+  $('#demoBar').innerHTML = (S.demo ? `<div class="demo-bar"><span>Kamu sedang melihat <b>data contoh</b>. Angkanya rekaan, bebas diutak-atik.</span><button type="button" class="btn sm dark" data-cleardemo>Hapus & mulai dari nol</button></div>` : '') + chBar();
   refresh();
   if (routeChanged) { scrollTo(0, 0); }
 }
@@ -2335,6 +2520,7 @@ function refresh() {
 function route() {
   const id = (location.hash.match(/^#\/([\w-]+)/) || [])[1];
   curId = V[id] ? id : 'ringkasan';
+  if (S.ch) { chTrack(); if (curId === 'ringkasan') chVisit(); }
   rerender();
 }
 let rzT; addEventListener('resize', () => { clearTimeout(rzT); rzT = setTimeout(() => { $$('#vw [data-k]').forEach((e) => e._h = null); refresh(); }, 120); });
